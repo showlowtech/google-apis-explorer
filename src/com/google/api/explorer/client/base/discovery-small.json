@@ -1,0 +1,56 @@
+{
+  "name" : "moderator",
+  "version" : "v1",
+  "description" : "Moderator API",
+  "restBasePath" : "/moderator/v1",
+  "rpcPath" : "/rpc",
+  "methods": {
+    "get": {
+      "restPath": "/get/{param}",
+      "rpcMethod": "moderator.get",
+      "httpMethod": "GET",
+      "parameters": {
+        "param": {
+          "restParameterType": "path",
+          "required": false
+        }
+      }
+    }
+  },
+  "resources": {
+    "series": {
+      "resources": {
+        "my": {
+          "methods": {
+            "get": {
+              "restPath": "/series/my/{seriesId}",
+              "rpcMethod": "moderator.series.my.get",
+              "httpMethod": "GET",
+              "parameters": {
+                "seriesId": {
+                  "restParameterType": "path",
+                  "pattern": "(foo|bar)",
+                  "required": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "methods": {
+        "get": {
+          "restPath": "/series/{seriesId}",
+          "rpcMethod": "moderator.series.get",
+          "httpMethod": "GET",
+          "parameters": {
+            "seriesId": {
+              "restParameterType": "path",
+              "pattern": "[^/]+",
+              "required": true
+            }
+          }
+        }
+      }
+    }
+  }
+}
