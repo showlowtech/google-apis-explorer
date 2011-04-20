@@ -43,7 +43,7 @@ public class ServiceSelector extends Composite implements ServiceSelectorPresent
 
   // API names that should be explicitly excluded from the Explorer.
   private static final Set<String> SERVICE_BLACKLIST =
-      ImmutableSet.of("chromewebstore", "latitude", "prediction");
+      ImmutableSet.of("chromewebstore", "latitude");
 
   private static ServiceSelectorUiBinder uiBinder = GWT.create(ServiceSelectorUiBinder.class);
 
