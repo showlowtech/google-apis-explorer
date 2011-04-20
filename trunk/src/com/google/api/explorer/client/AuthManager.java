@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Google Inc.
+ * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,10 +20,10 @@ import com.google.api.explorer.client.base.ApiService;
 import com.google.api.explorer.client.event.AuthGrantedEvent;
 import com.google.api.explorer.client.event.AuthRequestedEvent;
 import com.google.api.gwt.oauth2.client.Auth;
+import com.google.api.gwt.oauth2.client.AuthRequest;
 import com.google.api.gwt.oauth2.client.LoginCallback;
 import com.google.common.collect.Maps;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.http.client.UrlBuilder;
 
 import java.util.Map;
 
@@ -35,10 +35,7 @@ import java.util.Map;
  */
 public class AuthManager implements AuthRequestedEvent.Handler {
 
-  private static final String AUTH_URL_PROTOCOL = "https";
-  private static final String AUTH_URL_HOST = "accounts.google.com";
-  private static final String AUTH_URL_PATH = "o/oauth2/auth";
-
+  private static final String AUTH_URL = "https://accounts.google.com/o/oauth2/auth";
   private static final String CLIENT_ID = "835264079878.apps.googleusercontent.com";
   private static final Map<ApiService, String> AUTH_TOKENS = Maps.newHashMap();
   private final EventBus eventBus;
@@ -56,14 +53,9 @@ public class AuthManager implements AuthRequestedEvent.Handler {
 
     // TODO(jasonhall): Show some indication that auth is in progress here.
 
-    UrlBuilder urlBuilder = new UrlBuilder()
-        .setProtocol(AUTH_URL_PROTOCOL)
-        .setHost(AUTH_URL_HOST)
-        .setPath(AUTH_URL_PATH)
-        .setParameter("client_id", CLIENT_ID)
-        .setParameter("scope", event.scope);
+    AuthRequest req = new AuthRequest(AUTH_URL, CLIENT_ID).withScopes(event.scope);
 
-    Auth.authenticate(urlBuilder, new LoginCallback() {
+    Auth.get().login(req, new LoginCallback() {
       @Override
       public void onLogin(String token) {
         AUTH_TOKENS.put(appState.getCurrentService(), token);
