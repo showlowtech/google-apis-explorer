@@ -17,10 +17,10 @@
 package com.google.api.explorer.client.base;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.gwt.autobean.shared.AutoBean;
-import com.google.gwt.autobean.shared.AutoBeanCodex;
-import com.google.gwt.autobean.shared.AutoBeanFactory;
-import com.google.gwt.autobean.shared.AutoBeanFactory.Category;
+import com.google.web.bindery.autobean.shared.AutoBean;
+import com.google.web.bindery.autobean.shared.AutoBeanCodex;
+import com.google.web.bindery.autobean.shared.AutoBeanFactory;
+import com.google.web.bindery.autobean.shared.AutoBeanFactory.Category;
 import com.google.gwt.core.client.GWT;
 
 import java.util.Map;

@@ -16,7 +16,7 @@
 
 package com.google.api.explorer.client.base;
 
-import com.google.gwt.autobean.shared.AutoBean.PropertyName;
+import com.google.web.bindery.autobean.shared.AutoBean.PropertyName;
 
 import java.util.List;
 
