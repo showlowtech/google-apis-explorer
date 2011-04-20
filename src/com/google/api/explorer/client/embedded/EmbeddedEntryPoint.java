@@ -95,7 +95,7 @@ public class EmbeddedEntryPoint implements EntryPoint {
     // Set the OAuth2 popup window URL if one is given in the embedding div.
     String authPopup = rootElement.getAttribute(AUTH_POPUP_ATTR);
     if (!authPopup.isEmpty()) {
-      Auth.popupUrl = authPopup;
+      Auth.get().setOAuthWindowUrl(authPopup);
     }
 
     // begin_strip
