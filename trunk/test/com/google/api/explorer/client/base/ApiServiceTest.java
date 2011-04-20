@@ -21,8 +21,8 @@ import com.google.api.explorer.client.base.ApiParameter.RestParameterType;
 import com.google.api.explorer.client.base.ApiService.Helper.Factory;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-import com.google.gwt.autobean.server.AutoBeanFactoryMagic;
-import com.google.gwt.autobean.shared.AutoBeanCodex;
+import com.google.web.bindery.autobean.shared.AutoBeanCodex;
+import com.google.web.bindery.autobean.vm.AutoBeanFactorySource;
 
 import junit.framework.TestCase;
 
@@ -60,7 +60,7 @@ public class ApiServiceTest extends TestCase {
       String jsonString = CharStreams.toString(reader);
       stream.close();
 
-      Factory factory = AutoBeanFactoryMagic.create(Factory.class);
+      Factory factory = AutoBeanFactorySource.create(Factory.class);
       ApiService service =
           AutoBeanCodex.decode(factory, ApiService.class, jsonString).as();
       return service;
