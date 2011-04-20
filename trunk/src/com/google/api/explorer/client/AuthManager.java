@@ -21,8 +21,8 @@ import com.google.api.explorer.client.event.AuthGrantedEvent;
 import com.google.api.explorer.client.event.AuthRequestedEvent;
 import com.google.api.gwt.oauth2.client.Auth;
 import com.google.api.gwt.oauth2.client.AuthRequest;
-import com.google.api.gwt.oauth2.client.LoginCallback;
 import com.google.common.collect.Maps;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.shared.EventBus;
 
 import java.util.Map;
@@ -55,9 +55,9 @@ public class AuthManager implements AuthRequestedEvent.Handler {
 
     AuthRequest req = new AuthRequest(AUTH_URL, CLIENT_ID).withScopes(event.scope);
 
-    Auth.get().login(req, new LoginCallback() {
+    Auth.get().login(req, new Callback<String, Throwable>() {
       @Override
-      public void onLogin(String token) {
+      public void onSuccess(String token) {
         AUTH_TOKENS.put(appState.getCurrentService(), token);
         eventBus.fireEvent(new AuthGrantedEvent(appState.getCurrentService(), token));
       }
