@@ -27,7 +27,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 /**
@@ -48,13 +47,6 @@ public class ExplorerEntryPoint implements EntryPoint {
     // Make sure that CSS gets applied.
     Resources.INSTANCE.style().ensureInjected();
 
-    // begin_strip
-    // If the URL specifies a base URL, use it.
-    String baseUrl = Window.Location.getParameter("base");
-    if (baseUrl != null) {
-      Config.setBaseUrl(baseUrl);
-    }
-    // end_strip
 
     // Set the API key and application name to use for calls from the Explorer.
     Config.setApiKey(API_KEY);

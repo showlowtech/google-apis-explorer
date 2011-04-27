@@ -42,12 +42,6 @@ public abstract class Config {
     return userAgent;
   }
 
-  // begin_strip
-  public static void setBaseUrl(String baseUrl) {
-    Config.baseUrl = baseUrl;
-  }
-
-  // end_strip
 
   /**
    * Returns the base URL to use when making requests.

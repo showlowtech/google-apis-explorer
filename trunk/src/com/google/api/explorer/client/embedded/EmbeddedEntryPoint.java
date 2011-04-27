@@ -98,13 +98,6 @@ public class EmbeddedEntryPoint implements EntryPoint {
       Auth.get().setOAuthWindowUrl(authPopup);
     }
 
-    // begin_strip
-    // Set the base URL if one is given in the embedding div.
-    String base = rootElement.getAttribute(BASE_ATTR);
-    if (base != null && !base.isEmpty()) {
-      Config.setBaseUrl(base);
-    }
-    // end_strip
 
     // Set the API key and application name to use for calls from the Explorer.
     Config.setApiKey(ExplorerEntryPoint.API_KEY);
