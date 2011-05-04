@@ -18,13 +18,14 @@ package com.google.api.explorer.client.auth;
 
 import com.google.api.explorer.client.AuthManager;
 import com.google.api.explorer.client.auth.AuthPresenter.Display.State;
+import com.google.api.explorer.client.base.ApiService.AuthScope;
 import com.google.api.explorer.client.event.AuthGrantedEvent;
 import com.google.api.explorer.client.event.AuthRequestedEvent;
 import com.google.api.explorer.client.event.ServiceLoadedEvent;
 import com.google.api.explorer.client.event.ServiceSelectedEvent;
 import com.google.gwt.event.shared.EventBus;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * Presenter to handle logic for authentication view.
@@ -36,7 +37,7 @@ public class AuthPresenter
 
   interface Display {
     /** Set the list of available scopes for the current service. */
-    void setScopes(List<AuthScope> scopes);
+    void setScopes(Map<String, AuthScope> scopes);
 
     /**
      * Get the name of the selected scope, or {@code null} if there are no
@@ -83,14 +84,18 @@ public class AuthPresenter
     display.setState(State.PUBLIC);
   }
 
+  /** Key in the "auth" map that defines OAuth 2.0 information. */
+  private static final String OAUTH2_KEY = "oauth2";
+
   @Override
   public void onServiceLoaded(ServiceLoadedEvent event) {
-    List<AuthScope> scopes = AuthScope.forService(event.service);
-    if (scopes.isEmpty()) {
+    if (event.service.getAuth() == null
+        || !event.service.getAuth().containsKey(OAUTH2_KEY)
+        || event.service.getAuth().get(OAUTH2_KEY).getScopes().isEmpty()) {
       display.setState(State.ONLY_PUBLIC);
     } else {
       display.setState(authManager.getToken() == null ? State.PUBLIC : State.PRIVATE);
-      display.setScopes(AuthScope.forService(event.service));
+      display.setScopes(event.service.getAuth().get(OAUTH2_KEY).getScopes());
     }
   }
 

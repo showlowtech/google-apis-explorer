@@ -121,7 +121,7 @@ class JsonPrettifier {
    * method is found, this will return {@code null}.
    */
   private static Map.Entry<String, ApiMethod> getMethodForUrl(String url) {
-    String apiLinkPrefix = Config.getBaseUrl() + appState.getCurrentService().getRestBasePath();
+    String apiLinkPrefix = Config.getBaseUrl() + appState.getCurrentService().getBasePath();
     if (!url.startsWith(apiLinkPrefix)) {
       return null;
     }
@@ -143,7 +143,7 @@ class JsonPrettifier {
       // method's rest base path URI template. To do this we have to remove the
       // {...} placeholders.
       String regex =
-          apiLinkPrefix + entry.getValue().getRestPath().replaceAll("\\{[^\\/]+\\}", "[^\\/]+");
+          apiLinkPrefix + entry.getValue().getPath().replaceAll("\\{[^\\/]+\\}", "[^\\/]+");
       if (path.matches(regex)) {
         return entry;
       }
@@ -183,10 +183,10 @@ class JsonPrettifier {
         .append("&")
         .append(path);
 
-    String pathTemplate = entry.getValue().getRestPath();
+    String pathTemplate = entry.getValue().getPath();
     if (pathTemplate.contains("{")) {
       String urlPath = url.replaceFirst(
-          Config.getBaseUrl() + appState.getCurrentService().getRestBasePath(), "");
+          Config.getBaseUrl() + appState.getCurrentService().getBasePath(), "");
       if (urlPath.contains("?")) {
         urlPath = urlPath.substring(0, urlPath.indexOf('?'));
       }

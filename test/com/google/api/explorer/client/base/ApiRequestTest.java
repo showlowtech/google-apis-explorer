@@ -332,7 +332,7 @@ public class ApiRequestTest extends TestCase {
 
   /** Tests proper creation of the Discovery path and error cases. */
   public void testDiscoveryPath() {
-    assertEquals("/discovery/v0.3/describe/service/version",
+    assertEquals("/discovery/v1/apis/service/version/rest",
         ApiServiceFactory.createDiscoveryPath("service", "version"));
 
     assertIllegalArgument(null, "version", "Service name cannot be null or empty");
@@ -362,11 +362,11 @@ public class ApiRequestTest extends TestCase {
   public void testGetRequestPath() {
     ApiMethod method = EasyMock.createControl().createMock(ApiMethod.class);
     EasyMock.expect(method.getHttpMethod()).andReturn(HttpMethod.GET);
-    EasyMock.expect(method.getRestPath()).andReturn("/path/to/{pathParam}").times(3);
+    EasyMock.expect(method.getPath()).andReturn("/path/to/{pathParam}").times(3);
 
     ApiService service = EasyMock.createControl().createMock(ApiService.class);
     EasyMock.expect(service.method("method")).andReturn(method);
-    EasyMock.expect(service.getRestBasePath()).andReturn("/base").times(3);
+    EasyMock.expect(service.getBasePath()).andReturn("/base").times(3);
 
     EasyMock.replay(method, service);
 

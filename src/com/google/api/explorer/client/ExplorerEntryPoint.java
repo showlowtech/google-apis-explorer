@@ -44,7 +44,7 @@ public class ExplorerEntryPoint implements EntryPoint {
 
   /** Path to the Directory listing all APIs. */
   private static final String DIRECTORY_REQUEST_PATH =
-      "/discovery/" + ApiServiceFactory.DISCOVERY_VERSION + "/directory";
+      "/discovery/" + ApiServiceFactory.DISCOVERY_VERSION + "/apis";
 
   @Override
   public void onModuleLoad() {

@@ -32,7 +32,7 @@ public interface ApiMethod {
   }
 
   /** Path URL template of this method. */
-  String getRestPath();
+  String getPath();
 
   /** HTTP Method that will be used when this method is executed using REST. */
   HttpMethod getHttpMethod();
@@ -55,4 +55,10 @@ public interface ApiMethod {
    * </p>
    */
   List<String> getParameterOrder();
+
+  /**
+   * {@link List} of auth scope keys (corresponding to keys in {@link
+   * ApiService.AuthInformation#getScopes()}) that can be used by this method.
+   */
+  List<String> getScopes();
 }

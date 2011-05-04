@@ -17,7 +17,6 @@
 package com.google.api.explorer.client.base;
 
 import com.google.api.explorer.client.base.ApiMethod.HttpMethod;
-import com.google.api.explorer.client.base.ApiParameter.RestParameterType;
 import com.google.api.explorer.client.base.ApiService.Helper.Factory;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
@@ -75,7 +74,7 @@ public class ApiServiceTest extends TestCase {
     assertEquals("moderator", service.getName());
     assertEquals("v1", service.getVersion());
     assertEquals("Moderator API", service.getDescription());
-    assertEquals("/moderator/v1", service.getRestBasePath());
+    assertEquals("/moderator/v1", service.getBasePath());
     assertEquals(1, service.getResources().keySet().size());
     assertEquals(1, service.getMethods().keySet().size());
   }
@@ -83,11 +82,10 @@ public class ApiServiceTest extends TestCase {
   /** Tests that a top-level method is parsed as expected. */
   public void testToplevelMethod() {
     ApiMethod get = service.getMethods().get("get");
-    assertEquals("/get/{param}", get.getRestPath());
+    assertEquals("/get/{param}", get.getPath());
     assertEquals(HttpMethod.GET, get.getHttpMethod());
 
     ApiParameter param = get.getParameters().get("param");
-    assertEquals(RestParameterType.PATH, param.getRestParameterType());
     assertFalse(param.isRequired());
     assertNull(param.getPattern());
   }
@@ -99,11 +97,10 @@ public class ApiServiceTest extends TestCase {
     assertEquals(1, series.getResources().keySet().size());
 
     ApiMethod seriesGet = series.getMethods().get("get");
-    assertEquals("/series/{seriesId}", seriesGet.getRestPath());
+    assertEquals("/series/{seriesId}", seriesGet.getPath());
     assertEquals(HttpMethod.GET, seriesGet.getHttpMethod());
 
     ApiParameter seriesId = seriesGet.getParameters().get("seriesId");
-    assertEquals(RestParameterType.PATH, seriesId.getRestParameterType());
 
     // TODO(jasonhall): There is a bug with AutoBeans in JRE where booleans --
     // like isRequired() -- are always false, meaning this always passes
@@ -121,12 +118,11 @@ public class ApiServiceTest extends TestCase {
     assertEquals(1, my.getMethods().keySet().size());
 
     ApiMethod myGet = my.getMethods().get("get");
-    assertEquals("/series/my/{seriesId}", myGet.getRestPath());
+    assertEquals("/series/my/{seriesId}", myGet.getPath());
     assertEquals(HttpMethod.GET, myGet.getHttpMethod());
     assertEquals(1, myGet.getParameters().keySet().size());
 
     ApiParameter seriesId = myGet.getParameters().get("seriesId");
-    assertEquals(RestParameterType.PATH, seriesId.getRestParameterType());
     assertFalse(seriesId.isRequired());
     assertEquals("(foo|bar)", seriesId.getPattern());
   }
