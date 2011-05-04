@@ -306,7 +306,7 @@ public class ApiRequestTest extends TestCase {
     ApiRequest request = new ApiRequest(service, "method");
 
     Config.setApiKey("MY_API_KEY");
-    request.useApiKey();
+    request.maybeSetApiKeyParameter();
     assertEquals(Lists.newArrayList("MY_API_KEY"), request.paramValues.get("key"));
     EasyMock.verify();
   }
@@ -324,10 +324,9 @@ public class ApiRequestTest extends TestCase {
     assertNull(request.service);
     request.validate(); // Validation passes (and is in fact a no-op)
 
-    // Setting the API key makes it appear in the query
+    // Setting the API key does not make it appear in the query
     Config.setApiKey("MY_API_KEY");
-    assertEquals("/some/path?key=MY_API_KEY", request.getRequestPath());
-
+    assertEquals("/some/path", request.getRequestPath());
     // TODO(jasonhall): Test creating a request with query parameters.
   }
 

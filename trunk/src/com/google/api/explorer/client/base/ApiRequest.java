@@ -98,6 +98,10 @@ public class ApiRequest {
    * {@link ApiRequest#ApiRequest(String)}), or {@code null} if this constructor
    * was not used, in which case the {@link #service} and {@link #method} will
    * be used to construct the request path.
+   *
+   * <p>
+   * If the request path is explicitly set, the API key will be ignored.
+   * </p>
    */
   public final String requestPath;
 
@@ -117,6 +121,12 @@ public class ApiRequest {
    * canceled. This will be null until the request is sent.
    */
   private CrossDomainRequest innerRequest;
+
+  /**
+   * Whether or not to pass the API key when making this request. This is {@code
+   * true} by default, unless the {@link #requestPath} is set.
+   */
+  public boolean useApiKey = true;
 
   /**
    * Constructs a {@link ApiRequest} that will make a request to the method with
@@ -152,6 +162,7 @@ public class ApiRequest {
     this.httpMethod = HttpMethod.GET;
     this.service = null;
     this.method = null;
+    useApiKey = false;
   }
 
   /**
@@ -284,17 +295,17 @@ public class ApiRequest {
   public void send(AsyncCallback<ApiResponse> callback) {
     validate();
     setHeaders();
-    useApiKey();
+    maybeSetApiKeyParameter();
     this.innerRequest = HttpRequestBuilderHolder.REQUEST_BUILDER.makeRequest(this, callback);
   }
 
   /**
-   * Add the API key as a parameter, if it has been set in
+   * Add the API key as a request parameter, if it has been set in
    * {@link Config#setApiKey(String)}).
    */
   @VisibleForTesting
-  void useApiKey() {
-    if (!Config.getApiKey().isEmpty()) {
+  void maybeSetApiKeyParameter() {
+    if (useApiKey && !Config.getApiKey().isEmpty()) {
       paramValues.put("key", Config.getApiKey());
     }
   }
@@ -317,12 +328,6 @@ public class ApiRequest {
    */
   public String getRequestPath() {
     if (requestPath != null) {
-      if (!Config.getApiKey().isEmpty()) {
-        return requestPath.contains("?") ? requestPath + "&key="
-            + URL.encodeQueryString(Config.getApiKey()) : requestPath + "?key="
-            + Config.getApiKey();
-      }
-
       return requestPath;
     }
 
