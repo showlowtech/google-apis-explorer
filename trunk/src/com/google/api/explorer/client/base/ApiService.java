@@ -42,7 +42,7 @@ public interface ApiService extends HasMethodsAndResources {
   String getDescription();
 
   /** Base path of all methods in this service; used for REST requests. */
-  String getRestBasePath();
+  String getBasePath();
 
   /**
    * Returns the {@link ApiMethod} identified by the given method identifier,
@@ -58,10 +58,32 @@ public interface ApiService extends HasMethodsAndResources {
   Map<String, ApiMethod> allMethods();
 
   /**
+   * Returns a {@link Map} of {@link AuthInformation} keyed by its auth type.
+   * Currently, the only key will be "oauth2", describing OAuth 2.0
+   * authentication information.
+   */
+  Map<String, AuthInformation> getAuth();
+
+  /**
    * Represents an API service resource containing methods to call and possibly
    * other nested resources.
    */
   static interface ApiResource extends HasMethodsAndResources {
+  }
+
+  /** Represents information about authentication options for a service. */
+  static interface AuthInformation {
+    /**
+     * Map of auth scope information, where the key is the auth scope URL and
+     * the value is a {@link AuthScope} further describing that scope.
+     */
+    Map<String, AuthScope> getScopes();
+  }
+
+  /** Represents information about authentication scopes for a service. */
+  static interface AuthScope {
+    /** Returns the description of this authentication scope. */
+    String getDescription();
   }
 
   /**

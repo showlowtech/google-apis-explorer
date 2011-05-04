@@ -327,14 +327,18 @@ public class ApiRequest {
    * </p>
    */
   public String getRequestPath() {
+    // If the request path was explicitly set, we prepend the base URL path to
+    // the request path given.
     if (requestPath != null) {
       return requestPath;
     }
 
-    String pathUrl = method.getRestPath();
+    // If the request path was not set, we assemble it from the base URL path,
+    // and the method's path.
+    String pathUrl = method.getPath();
     Set<String> unusedParamKeys = new HashSet<String>(paramValues.keySet());
 
-    StringBuilder sb = new StringBuilder(service.getRestBasePath());
+    StringBuilder sb = new StringBuilder(service.getBasePath());
 
     boolean addSlash = false;
     for (String section : pathUrl.split("/")) {
@@ -385,4 +389,5 @@ public class ApiRequest {
       innerRequest.cancel();
     }
   }
+
 }

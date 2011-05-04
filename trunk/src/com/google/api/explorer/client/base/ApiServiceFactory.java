@@ -37,7 +37,7 @@ public class ApiServiceFactory {
   public static final ApiServiceFactory INSTANCE = new ApiServiceFactory();
 
   /** Discovery API version to use. */
-  public static final String DISCOVERY_VERSION = "v0.3";
+  public static final String DISCOVERY_VERSION = "v1";
 
   /**
    * Generates a {@link ApiService} based on the results of a Discovery API
@@ -69,6 +69,6 @@ public class ApiServiceFactory {
     Preconditions.checkArgument(
         !Strings.isNullOrEmpty(serviceName), "Service name cannot be null or empty");
     Preconditions.checkArgument(!Strings.isNullOrEmpty(version), "Version cannot be null or empty");
-    return "/discovery/" + DISCOVERY_VERSION + "/describe/" + serviceName + "/" + version;
+    return "/discovery/" + DISCOVERY_VERSION + "/apis/" + serviceName + "/" + version + "/rest";
   }
 }

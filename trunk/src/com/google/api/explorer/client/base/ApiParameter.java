@@ -27,22 +27,6 @@ import java.util.List;
  */
 public interface ApiParameter {
   /**
-   * Where in the REST request URL the parameter value will be placed.
-   */
-  public enum RestParameterType {
-    /** The parameter value will be inserted into the request URL's path. */
-    @PropertyName("path")
-    PATH,
-
-    /** The parameter value will be added to the request URL's query string. */
-    @PropertyName("query")
-    QUERY;
-  }
-
-  /** Where in the REST request URL this parameter will be placed. */
-  RestParameterType getRestParameterType();
-
-  /**
    * Regular expression pattern that any value of this parameter must match, or
    * {@code null} if no pattern is defined.
    */

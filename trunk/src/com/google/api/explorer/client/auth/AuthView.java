@@ -17,6 +17,7 @@
 package com.google.api.explorer.client.auth;
 
 import com.google.api.explorer.client.AuthManager;
+import com.google.api.explorer.client.base.ApiService.AuthScope;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,7 +31,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * View for Authentication status and authentication link.
@@ -43,6 +44,11 @@ public class AuthView extends Composite implements AuthPresenter.Display {
 
   interface AuthUiBinder extends UiBinder<Widget, AuthView> {
   }
+
+  /** Common prefix of all auth scopes. Remove this to get the unique ID. */
+  // TODO(jasonhall): When Discovery provides an auth scope alias, use that
+  // instead of the de-prefixed scope URL.
+  private static String AUTH_URL_PREFIX = "https://www.googleapis.com/auth/";
 
   @UiField InlineLabel authState;
   @UiField InlineLabel authLink;
@@ -80,13 +86,17 @@ public class AuthView extends Composite implements AuthPresenter.Display {
   }
 
   @Override
-  public void setScopes(List<AuthScope> scopes) {
+  public void setScopes(Map<String, AuthScope> scopes) {
     hasScopes = !scopes.isEmpty();
     scopeSelectorListBox.clear();
 
     if (hasScopes) {
-      for (AuthScope scope : scopes) {
-        scopeSelectorListBox.addItem(scope.name, scope.authScopeUrl);
+      for (String scope : scopes.keySet()) {
+        // If the scope begins with the common URL prefix, strip it.
+        String name = scope.startsWith(AUTH_URL_PREFIX)
+            ? scope.substring(AUTH_URL_PREFIX.length(), scope.length())
+            : scope;
+        scopeSelectorListBox.addItem(name);
       }
       scopeSelectorListBox.setSelectedIndex(0);
     }
@@ -95,6 +105,7 @@ public class AuthView extends Composite implements AuthPresenter.Display {
   @Override
   public String getSelectedScope() {
     return hasScopes
-        ? scopeSelectorListBox.getValue(scopeSelectorListBox.getSelectedIndex()) : null;
+        ? AUTH_URL_PREFIX + scopeSelectorListBox.getValue(scopeSelectorListBox.getSelectedIndex())
+        : null;
   }
 }
