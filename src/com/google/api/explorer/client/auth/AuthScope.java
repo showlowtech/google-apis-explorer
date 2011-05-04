@@ -34,6 +34,7 @@ public enum AuthScope {
   BUZZ_PHOTOS("buzz", "Buzz (photos)", "https://www.googleapis.com/auth/photos"),
   MODERATOR("moderator", "Moderator", "https://www.googleapis.com/auth/moderator"),
   LATITUDE("latitude", "Latitude", "https://www.googleapis.com/auth/latitude"),
+  PREDICTION("prediction", "Prediction", "https://www.googleapis.com/auth/prediction"),
   TASKS("tasks", "Tasks (read/write)", "https://www.googleapis.com/auth/tasks"),
   TASKS_READONLY("tasks", "Tasks (read-only)", "https://www.googleapis.com/auth/tasks.readonly"),
   URLSHORTENER("urlshortener", "URL Shortener", "https://www.googleapis.com/auth/urlshortener"),

@@ -18,6 +18,7 @@ package com.google.api.explorer.client.parameter;
 
 import com.google.api.explorer.client.AppState;
 import com.google.api.explorer.client.AuthManager;
+import com.google.api.explorer.client.ExplorerConfig;
 import com.google.api.explorer.client.base.ApiMethod;
 import com.google.api.explorer.client.base.ApiParameter;
 import com.google.api.explorer.client.base.ApiRequest;
@@ -50,10 +51,15 @@ public class ParameterFormPresenter implements MethodSelectedEvent.Handler,
 
   public interface Display {
     void setMethod(ApiMethod method, SortedMap<String, ApiParameter> sortedParams);
+
     Multimap<String, String> getParameterValues();
+
     void setParameterValues(Multimap<String, String> paramValues);
+
     void setVisible(boolean visible);
+
     String getBodyText();
+
     void setExecuting(boolean executing);
   }
 
@@ -128,6 +134,10 @@ public class ParameterFormPresenter implements MethodSelectedEvent.Handler,
 
     // Enable pretty-printing of the response.
     req.paramValues.put("pp", "1");
+
+    // Do not send the API key if the service is a public-only API.
+    req.useApiKey =
+        !ExplorerConfig.PUBLIC_ONLY_APIS.contains(appState.getCurrentService().getName());
 
     // Set the auth header if we have a token.
     String oauth2Token = authManager.getToken();
