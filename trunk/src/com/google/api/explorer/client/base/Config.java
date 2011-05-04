@@ -25,8 +25,10 @@ import com.google.common.base.Strings;
  */
 public abstract class Config {
 
+  public static final String DEFAULT_BASE_URL = "https://www.googleapis.com";
+
   private static final String VERSION = "0.1-alpha";
-  private static String baseUrl = "https://www.googleapis.com";
+  private static String baseUrl = DEFAULT_BASE_URL;
   private static String userAgent = "google-api-gwt-client/" + VERSION;
   private static String apiKey = "";
 
