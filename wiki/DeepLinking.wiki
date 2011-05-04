@@ -3,9 +3,7 @@
 
 If you're working with an API, you may occasionally find yourself wanting to send a link to a teammate to a particular method, to let them try it out.
 
-The APIs Explorer makes this easy.
-
-A link to the APIs Explorer can be composed in such a way to enable a service, version, and method to be pre-selected, and to allow parameter values to be preset.
+The APIs Explorer makes this easy by augmenting the URL's fragment.
 
 = Linking to a Service and Version =
 
@@ -15,7 +13,11 @@ To link to a particular version of a particular service, construct a link like s
   * #`_`s=_{serviceName}_
   * #`_`v=_{version}_
 
-For example, this link pre-selects v1 of the Buzz API: https://code.google.com/apis/explorer/#_s=buzz&_v=v1
+For example, this link pre-selects v1 of the Buzz API:
+
+{{{
+https://code.google.com/apis/explorer/#_s=buzz&_v=v1
+}}}
 
 = Linking to a Method =
 
@@ -27,7 +29,10 @@ To drill deeper into a service, you can construct a link that pre-selects a give
   * #`_`m=_{methodName}_
 
 This link pre-selects Buzz v1's `activities.search` method:
+
+{{{
 https://code.google.com/apis/explorer/#_s=buzz&_v=v1&_m=activities.search
+}}}
 
 = Pre-filling Parameter Values =
 
@@ -42,11 +47,15 @@ If you'd like to send a link that pre-fills some parameter values, that is also 
 
 This link pre-selects Buzz v1's `activities.search` method, and pre-fills the `q` and `max-results` parameters:
 
+{{{
 http://code.google.com/apis/explorer/#_s=buzz&_v=v1&_m=activities.search&alt=json&max-results=4&q=Google
+}}}
 
 Remember to URL-encode any parameter values when specifying parameters this way. This URL pre-fills the `q` parameter with a value containing spaces:
 
-http://code.google.com/apis/explorer/#_s=buzz&_v=v1&_m=activities.search&alt=json&max-results=4&q=Google%20APIs%20Explorer
+{{{
+http://code.google.com/apis/explorer/#_s=buzz&_v=v1&_m=activities.search&max-results=4&q=Google%20APIs%20Explorer
+}}}
 
 = Conclusion =
 
