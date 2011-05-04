@@ -1,6 +1,11 @@
 #summary Describing the Explorer's link strategy to enable users to link to specific services and methods
 #labels Featured
 
+* Table of Contents *
+<wiki:toc max_depth="1" />
+
+= Introduction =
+
 If you're working with an API, you may occasionally find yourself wanting to send a link to a teammate to a particular method, to let them try it out.
 
 The APIs Explorer makes this easy by augmenting the URL's fragment.
@@ -57,7 +62,7 @@ Remember to URL-encode any parameter values when specifying parameters this way.
 http://code.google.com/apis/explorer/#_s=buzz&_v=v1&_m=activities.search&max-results=4&q=Google%20APIs%20Explorer
 }}}
 
-= Conclusion =
+= Additional Notes =
 
 Note that there is currently no way to specify in a URL that Private Access should be requested, or to automatically execute the request. This is on purpose, since this might allow for malicious behavior.
 
