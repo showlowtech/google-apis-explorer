@@ -148,6 +148,9 @@
           <a href="http://code.google.com/apis/explorer-help" target="_blank">Help</a>
           |
           <a href="http://code.google.com/apis/explorer-help/forum.html" target="_blank">Forum</a>
+          |
+          <a href="http://code.google.com/p/google-apis-explorer/issues/entry?template=Defect%20report%20from%20user"
+            target="_blank">Report a bug</a>
         </g:HTMLPanel>
       </g:south>
     </g:DockLayoutPanel>
