@@ -32,7 +32,7 @@ public class ExplorerConfig {
    * or another.
    */
   public static final Set<String> SERVICE_BLACKLIST =
-      ImmutableSet.of("chromewebstore", "latitude");
+      ImmutableSet.of("latitude");
 
   /**
    * APIs which do not require a key to access, and so will fail if one is
