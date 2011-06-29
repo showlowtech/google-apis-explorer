@@ -1,5 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:sch="urn:import:com.google.api.explorer.client.parameter.schema"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:style>
     .section {
       font-size: 14px;
@@ -100,7 +102,10 @@
         <g:HTMLPanel styleName="{style.popup} popup">
           <div class="{style.popupTitle} title">Request body</div>
           <div class="{style.popupBody} body">
-            <g:TextArea ui:field="requestBody" styleName="{style.requestBody}" />
+            <g:RadioButton ui:field="selectSchemaButton" name="view" value="true">Guided view</g:RadioButton>
+            <g:RadioButton ui:field="selectBasicButton" name="view">Basic view</g:RadioButton>
+            <sch:SchemaForm ui:field="schemaForm" />
+            <g:TextArea ui:field="requestBody" visible="false" styleName="{style.requestBody}" />
             <div>
               <g:Button ui:field="close">Close</g:Button>
             </div>

@@ -60,6 +60,7 @@
       <g:SimplePanel ui:field="errorPanel" styleName="{res.style.error}" visible="false" />
       <h3>Request</h3>
       <pre ui:field="requestDiv" />
+      <pre ui:field="requestBodyDiv" class="{style.response}"/>
 
       <h3>Response</h3>
       <pre ui:field="statusDiv" />

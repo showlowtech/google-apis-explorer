@@ -1,0 +1,20 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:style>
+    .listBox {
+      margin-left: 20px;
+      font-family: monospace;
+    }
+
+    .panel {
+      padding-left: 20px;
+    }
+  </ui:style>
+  <g:HTMLPanel>
+    {
+    <g:HTMLPanel ui:field="panel" styleName="{style.panel}" />
+    <g:ListBox ui:field="listBox" styleName="{style.listBox}" />
+    <div>}</div>
+  </g:HTMLPanel>
+</ui:UiBinder>

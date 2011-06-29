@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:sch="urn:import:com.google.api.explorer.client.parameter.schema">
   <ui:style>
     .section {
       font-size: 14px;
@@ -78,6 +79,11 @@
       background-color: #FFFFFF;
     }
 
+    .popupBody input {
+      border: 1px solid #AAAAAA;
+      font-family: monospace;
+    }
+
     .requestBody {
       height: 300px;
       width: 500px;
@@ -105,12 +111,18 @@
 
       <g:Label ui:field="bodyDisclosure" styleName="{style.showRequestBody}" />
 
-      <g:PopupPanel ui:field="popupPanel" autoHideEnabled="true" modal="true">
+      <g:PopupPanel ui:field="popupPanel" modal="true">
         <g:HTMLPanel styleName="{style.popup}">
           <div class="{style.popupTitle}">Request body</div>
           <div class="{style.popupBody}">
-            <g:TextArea ui:field="requestBody" styleName="{style.requestBody}" />
-            <div><g:Button ui:field="close">Close</g:Button></div>
+            <g:RadioButton ui:field="selectSchemaButton" name="view" value="true">Guided view</g:RadioButton>
+            <g:RadioButton ui:field="selectBasicButton" name="view">Basic view</g:RadioButton><br />
+
+            <sch:SchemaForm ui:field="schemaForm" />
+            <g:TextArea ui:field="requestBody" visible="false" styleName="{style.requestBody}" />
+            <div>
+              <g:Button ui:field="close">Close</g:Button>
+            </div>
           </div>
         </g:HTMLPanel>
       </g:PopupPanel>

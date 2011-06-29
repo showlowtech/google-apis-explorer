@@ -16,6 +16,7 @@
 
 package com.google.api.explorer.client.base;
 
+import com.google.api.explorer.client.base.Schema.Property.PropertyWrapper;
 import com.google.common.collect.HashBasedTable;
 import com.google.gwt.core.client.GWT;
 import com.google.web.bindery.autobean.shared.AutoBean;
@@ -186,7 +187,7 @@ public interface ApiService extends HasMethodsAndResources {
     /**
      * {@link AutoBeanFactory} class for {@link ApiService}s.
      */
-    @Category({ApiServiceWrapper.class})
+    @Category({ApiServiceWrapper.class, PropertyWrapper.class})
     public interface Factory extends AutoBeanFactory {
       AutoBean<ApiService> service();
     }

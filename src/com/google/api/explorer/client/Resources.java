@@ -56,6 +56,12 @@ public interface Resources extends ClientBundle {
 
   @Source(PATH + "magnifyingGlass.png")
   ImageResource magnifyingGlass();
+  
+  @Source(PATH + "remove.png")
+  ImageResource remove();
+  
+  @Source(PATH + "add.png")
+  ImageResource add();
 
   @Source(PATH + "explorer.css")
   Css style();
