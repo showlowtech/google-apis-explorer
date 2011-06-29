@@ -56,6 +56,7 @@ public class HistoryItem extends Composite {
   @UiField DivElement collapseDiv;
   @UiField SimplePanel errorPanel;
   @UiField PreElement requestDiv;
+  @UiField PreElement requestBodyDiv;
   @UiField PreElement statusDiv;
   @UiField InlineLabel showHideHeaders;
   @UiField PreElement responseHeadersDiv;
@@ -80,6 +81,7 @@ public class HistoryItem extends Composite {
     UIObject.setVisible(responseHeadersDiv, false);
     responseHeadersDiv.setInnerText(getResponseHeadersString(response));
     JsonPrettifier.syntaxHighlight(responseBodyDiv, response.body);
+    JsonPrettifier.syntaxHighlight(requestBodyDiv, request.body);
   }
 
   @UiHandler("showHideHeaders")
@@ -106,11 +108,6 @@ public class HistoryItem extends Composite {
       sb.append('\n').append(entry.getKey()).append(":  ").append(entry.getValue());
     }
 
-    // Display the request body if it was set. The body will already have been
-    // escaped by the GWT client, so does not need to be double-escaped here.
-    if (request.body != null) {
-      sb.append("\n\n").append(request.body);
-    }
     return sb.toString();
   }
 

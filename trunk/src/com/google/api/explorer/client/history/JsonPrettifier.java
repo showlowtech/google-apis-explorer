@@ -66,6 +66,12 @@ class JsonPrettifier {
   public static void syntaxHighlight(Element parent, String jsonString) {
     // Reset indentation (just in case)
     indent = 0;
+    
+    // Don't bother syntax highlighting empty text.
+    if (Strings.isNullOrEmpty(jsonString)) {
+      return;
+    }
+    
     if (!GWT.isScript()) {
       // Syntax highlighting is *very* slow in Development Mode (~30s for large
       // responses), but very fast when compiled and run as JS (~30ms). For the

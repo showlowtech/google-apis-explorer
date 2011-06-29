@@ -1,0 +1,21 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field="res" type="com.google.api.explorer.client.Resources" />
+  <ui:style>
+    .newItem {
+      cursor: pointer;
+      margin-left: 20px;
+    }
+
+    .panel {
+      padding-left: 20px;
+    }
+  </ui:style>
+  <g:HTMLPanel>
+    [
+    <g:HTMLPanel ui:field="panel" styleName="{style.panel}" />
+    <g:Image ui:field="newItem" styleName="{style.newItem}" resource="{res.add}"
+        title="Add a new element to this array" />
+    <div>]</div>
+  </g:HTMLPanel>
+</ui:UiBinder>

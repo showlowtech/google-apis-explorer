@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -22,8 +22,10 @@ import com.google.api.explorer.client.Resources;
 import com.google.api.explorer.client.base.ApiMethod;
 import com.google.api.explorer.client.base.ApiMethod.HttpMethod;
 import com.google.api.explorer.client.base.ApiParameter;
+import com.google.api.explorer.client.base.Schema;
 import com.google.api.explorer.client.editors.Editor;
 import com.google.api.explorer.client.editors.EditorFactory;
+import com.google.api.explorer.client.parameter.schema.SchemaForm;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -33,6 +35,8 @@ import com.google.common.collect.Multimap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -44,6 +48,7 @@ import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -55,7 +60,7 @@ import java.util.SortedMap;
 
 /**
  * View of the parameter form UI.
- *
+ * 
  * @author jasonhall@google.com (Jason Hall)
  */
 public class ParameterForm extends Composite implements ParameterFormPresenter.Display {
@@ -74,17 +79,24 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
   @UiField public FlexTable table;
   @UiField public Label bodyDisclosure;
   @UiField public PopupPanel popupPanel;
-  @UiField public TextArea requestBody;
   @UiField public Button close;
   @UiField public InlineLabel requiredDescription;
   @UiField public Button submit;
   @UiField public ImageElement executing;
+  @UiField(provided = true) public SchemaForm schemaForm;
+  @UiField public RadioButton selectSchemaButton;
+  @UiField public RadioButton selectBasicButton;
+  @UiField public TextArea requestBody;
 
+  private final AppState appState;
   private final ParameterFormPresenter presenter;
   private final CellFormatter cellFormatter;
 
   private static final String ADD_REQ_BODY = "Add request body";
   private static final String CHANGE_REQ_BODY = "Change request body";
+  
+  // Whether or not the basic textbox request body editor should be used.
+  private boolean useBasicEditor = false;
 
   /**
    * Bi-directional mapping between parameter name -> editor responsible for
@@ -93,7 +105,10 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
   private BiMap<String, Editor> nameToEditor = HashBiMap.create();
 
   public ParameterForm(EventBus eventBus, AppState appState, AuthManager authManager) {
-    initWidget();
+    schemaForm = new SchemaForm(appState);
+    initWidget(uiBinder.createAndBindUi(this));
+
+    this.appState = appState;
     cellFormatter = table.getCellFormatter();
     this.presenter = new ParameterFormPresenter(eventBus, appState, authManager, this);
 
@@ -102,6 +117,20 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
 
     popupPanel.show();
     popupPanel.hide();
+
+   selectSchemaButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<Boolean> event) {
+        selectSchema();
+      }
+    });
+
+    selectBasicButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<Boolean> event) {
+        selectBasic();
+      }
+    });
   }
 
   protected void initWidget() {
@@ -121,8 +150,23 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
 
   @UiHandler("close")
   public void close(ClickEvent event) {
-    bodyDisclosure.setText(requestBody.getText().isEmpty() ? ADD_REQ_BODY : CHANGE_REQ_BODY);
+    bodyDisclosure.setText(getBodyText().isEmpty() ? ADD_REQ_BODY : CHANGE_REQ_BODY);
     popupPanel.hide();
+  }
+
+  public void selectSchema() {
+    selectSchemaButton.setEnabled(true);
+    selectSchemaButton.setValue(true);
+    schemaForm.setVisible(true);
+    requestBody.setVisible(false);
+    useBasicEditor = false;
+  }
+
+  public void selectBasic() {
+    selectBasicButton.setValue(true);
+    schemaForm.setVisible(false);
+    requestBody.setVisible(true);
+    useBasicEditor = true;
   }
 
   /** Sets the parameters displayed in the table. */
@@ -151,6 +195,16 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
         addEditorRow(paramName, param, row++);
         addDescriptionRow(param, row++);
       }
+    }
+
+    // Call selectSchema() to reset enabled/visible state of form.
+    selectSchema();
+    Schema requestSchema = appState.getCurrentService().requestSchema(method);
+    if (requestSchema != null) {
+      schemaForm.setSchema(requestSchema);
+    } else {
+      selectBasic();
+      selectSchemaButton.setEnabled(false);
     }
   }
 
@@ -219,7 +273,8 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
     submit.setEnabled(!executing);
   }
 
+  @Override
   public String getBodyText() {
-    return requestBody.getText();
+    return useBasicEditor ? requestBody.getText() : schemaForm.getStringValue();
   }
 }
