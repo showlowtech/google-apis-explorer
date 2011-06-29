@@ -48,8 +48,7 @@ public class SchemaForm extends Composite {
   interface SchemaFormUiBinder extends UiBinder<Widget, SchemaForm> {
   }
 
-  @UiField
-  HTMLPanel root;
+  @UiField HTMLPanel root;
 
   final AppState appState;
   private ObjectSchemaEditor editor;
@@ -64,7 +63,12 @@ public class SchemaForm extends Composite {
    * this form.
    */
   public String getStringValue() {
-    return editor.getJSONValue().toString();
+    if (editor == null) {
+      return "";
+    }
+
+    String jsonValue = editor.getJSONValue().toString();
+    return jsonValue.equals("{}") ? "" : jsonValue;
   }
 
   /** Sets the {@link Schema} to be displayed in this form. */

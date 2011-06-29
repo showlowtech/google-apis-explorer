@@ -17,12 +17,6 @@
       padding: 5px 0;
     }
 
-    .noParams {
-      text-align: center;
-      width: 100%;
-      padding-top: 10px;
-    }
-
     .section table {
       width: 100%;
       padding: 2px;
@@ -100,29 +94,50 @@
     .executing {
       vertical-align: middle;
     }
+
+    .fields {
+      width: 400px;
+      max-height: 500px;
+      overflow:auto;
+    }
+
+    .fieldsExplanation {
+      color: #666;
+      padding-bottom: 12px;
+    }
   </ui:style>
   <g:HTMLPanel styleName="{style.section}">
     <g:Label styleName="{style.header}">Fill in parameters</g:Label>
     <div class="{style.body}">
       <g:FlexTable ui:field="table" />
-      <g:Label ui:field="noParams" styleName="{style.noParams}">
-        This method takes no parameters.
-      </g:Label>
-
       <g:Label ui:field="bodyDisclosure" styleName="{style.showRequestBody}" />
 
       <g:PopupPanel ui:field="popupPanel" modal="true">
         <g:HTMLPanel styleName="{style.popup}">
           <div class="{style.popupTitle}">Request body</div>
           <div class="{style.popupBody}">
+            <div class="{style.fieldsExplanation}">
+                Specify what will be sent in the HTTP request body.</div>
             <g:RadioButton ui:field="selectSchemaButton" name="view" value="true">Guided view</g:RadioButton>
             <g:RadioButton ui:field="selectBasicButton" name="view">Basic view</g:RadioButton><br />
-
             <sch:SchemaForm ui:field="schemaForm" />
             <g:TextArea ui:field="requestBody" visible="false" styleName="{style.requestBody}" />
             <div>
               <g:Button ui:field="close">Close</g:Button>
             </div>
+
+          </div>
+        </g:HTMLPanel>
+      </g:PopupPanel>
+
+      <g:PopupPanel ui:field="fieldsPopupPanel" modal="true">
+        <g:HTMLPanel styleName="{style.popup}">
+          <div class="{style.popupTitle}">Use partial fields mask</div>
+          <div class="{style.popupBody}">
+            <div class="{style.fieldsExplanation}">
+              Select which fields you would like to be included in the response.</div>
+            <g:HTMLPanel ui:field="fieldsPlaceholder" styleName="{style.fields}"/>
+            <g:Button ui:field="closeFields">Close</g:Button>
           </div>
         </g:HTMLPanel>
       </g:PopupPanel>
