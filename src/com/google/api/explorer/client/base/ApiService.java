@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2010 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,17 +17,17 @@
 package com.google.api.explorer.client.base;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.gwt.core.client.GWT;
 import com.google.web.bindery.autobean.shared.AutoBean;
 import com.google.web.bindery.autobean.shared.AutoBeanCodex;
 import com.google.web.bindery.autobean.shared.AutoBeanFactory;
 import com.google.web.bindery.autobean.shared.AutoBeanFactory.Category;
-import com.google.gwt.core.client.GWT;
 
 import java.util.Map;
 
 /**
  * Represents an API service containing methods that can be called.
- *
+ * 
  * @author jasonhall@google.com (Jason Hall)
  */
 public interface ApiService extends HasMethodsAndResources {
@@ -86,16 +86,42 @@ public interface ApiService extends HasMethodsAndResources {
     String getDescription();
   }
 
+  /** Returns a mapping of all schemas used by this service. */
+  Map<String, Schema> getSchemas();
+
+  /**
+   * Returns the request schema used by the given method, or {@code null} if
+   * none is required.
+   */
+  Schema requestSchema(ApiMethod method);
+
+  /**
+   * Returns the response schema used by the given method, or {@code null} if
+   * none is required.
+   */
+  Schema responseSchema(ApiMethod method);
+
+  /**
+   * Returns the schema used by the given schema property, or {@code null} if
+   * the property does not require a schema (e.g., it is a simple type).
+   */
+  Schema schemaForProperty(Schema.Property property);
+
   /**
    * Wrapper class used by the AutoBeanFactory to provide the implementation of
    * some methods.
+   *
+   * <p>
+   * All of these methods map to a method in {@link ApiService} which delegates
+   * to the method in this class to provide its implementation.
+   * </p>
    */
   class ApiServiceWrapper {
-    private static final HashBasedTable<ApiService, String, ApiMethod> TABLE =
-        HashBasedTable.create();
+    private static final HashBasedTable<ApiService, String, ApiMethod> TABLE = HashBasedTable
+        .create();
 
-    private static void populateTable(
-        String prefix, ApiService service, HasMethodsAndResources hasMethodsAndResources) {
+    private static void populateTable(String prefix, ApiService service,
+        HasMethodsAndResources hasMethodsAndResources) {
       if (hasMethodsAndResources.getMethods() != null) {
         for (Map.Entry<String, ApiMethod> entry : hasMethodsAndResources.getMethods().entrySet()) {
           TABLE.put(service, prefix + entry.getKey(), entry.getValue());
@@ -103,8 +129,8 @@ public interface ApiService extends HasMethodsAndResources {
       }
 
       if (hasMethodsAndResources.getResources() != null) {
-        for (Map.Entry<String, ApiService.ApiResource> entry :
-            hasMethodsAndResources.getResources().entrySet()) {
+        for (Map.Entry<String, ApiService.ApiResource> entry : hasMethodsAndResources
+            .getResources().entrySet()) {
           populateTable(prefix + entry.getKey() + ".", service, entry.getValue());
         }
       }
@@ -124,6 +150,23 @@ public interface ApiService extends HasMethodsAndResources {
         populateTable("", service, service);
       }
       return TABLE.row(service);
+    }
+
+    private static final String REF_KEY = "$ref";
+
+    public static Schema requestSchema(AutoBean<ApiService> instance, ApiMethod method) {
+      return method.getRequest() == null ? null : instance.as().getSchemas()
+          .get(method.getRequest().get(REF_KEY));
+    }
+
+    public static Schema responseSchema(AutoBean<ApiService> instance, ApiMethod method) {
+      return method.getResponse() == null ? null : instance.as().getSchemas()
+          .get(method.getResponse().get(REF_KEY));
+    }
+
+    public static Schema schemaForProperty(AutoBean<ApiService> instance,
+        Schema.Property property) {
+      return property.getRef() == null ? null : instance.as().getSchemas().get(property.getRef());
     }
   }
 

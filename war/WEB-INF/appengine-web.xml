@@ -6,5 +6,6 @@
   <static-files>
     <include path="**.nocache.*" expiration="0s" />
     <include path="**.cache.*" expiration="365d" />
+    <include path="**/com.google.api.explorer.Explorer.devmode.js" />
   </static-files>
 </appengine-web-app>
