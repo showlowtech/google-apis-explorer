@@ -9,12 +9,6 @@
       width: 100%;
     }
 
-    .noParams {
-      text-align: center;
-      width: 100%;
-      padding-top: 10px;
-    }
-
     .section table {
       width: 100%;
       padding: 2px;
@@ -86,14 +80,21 @@
     .executing {
       vertical-align: middle;
     }
+
+    .fields {
+      width: 500px;
+      max-height: 300px;
+      overflow:auto;
+    }
+
+    .fieldsExplanation {
+      color: #666;
+      padding-bottom: 12px;
+    }
   </ui:style>
   <g:HTMLPanel styleName="{style.section} form">
     <div class="{style.body}">
       <g:FlexTable ui:field="table" />
-      <g:Label ui:field="noParams" styleName="{style.noParams}">
-        This method takes no parameters.
-      </g:Label>
-
       <g:Label ui:field="bodyDisclosure" styleName="{style.showRequestBody}">
         Show request body
       </g:Label>
@@ -102,6 +103,8 @@
         <g:HTMLPanel styleName="{style.popup} popup">
           <div class="{style.popupTitle} title">Request body</div>
           <div class="{style.popupBody} body">
+            <div class="{style.fieldsExplanation}">
+                Specify what will be sent in the HTTP request body.</div>
             <g:RadioButton ui:field="selectSchemaButton" name="view" value="true">Guided view</g:RadioButton>
             <g:RadioButton ui:field="selectBasicButton" name="view">Basic view</g:RadioButton>
             <sch:SchemaForm ui:field="schemaForm" />
@@ -109,6 +112,18 @@
             <div>
               <g:Button ui:field="close">Close</g:Button>
             </div>
+          </div>
+        </g:HTMLPanel>
+      </g:PopupPanel>
+
+      <g:PopupPanel ui:field="fieldsPopupPanel" autoHideEnabled="true" modal="true">
+        <g:HTMLPanel styleName="{style.popup} popup">
+          <div class="{style.popupTitle} title">Use a partial fields mask</div>
+          <div class="{style.popupBody} body">
+            <div class="{style.fieldsExplanation}">
+              Select which fields you would like to be included in the response.</div>
+            <g:HTMLPanel ui:field="fieldsPlaceholder" styleName="{style.fields}"/>
+            <g:Button ui:field="closeFields">Close</g:Button>
           </div>
         </g:HTMLPanel>
       </g:PopupPanel>

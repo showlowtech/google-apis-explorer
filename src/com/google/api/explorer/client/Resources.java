@@ -56,10 +56,10 @@ public interface Resources extends ClientBundle {
 
   @Source(PATH + "magnifyingGlass.png")
   ImageResource magnifyingGlass();
-  
+
   @Source(PATH + "remove.png")
   ImageResource remove();
-  
+
   @Source(PATH + "add.png")
   ImageResource add();
 
@@ -113,5 +113,7 @@ public interface Resources extends ClientBundle {
     String jsonArray();
 
     String responseLine();
+    
+    String clickable();
   }
 }

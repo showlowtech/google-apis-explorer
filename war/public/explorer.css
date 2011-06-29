@@ -66,8 +66,7 @@
   color: #800;
 }
 
-.jsonNumber,
-.jsonBoolean {
+.jsonNumber,.jsonBoolean {
   color: #008;
 }
 
@@ -75,7 +74,7 @@
   color: #080;
 }
 
-a.jsonStringLink{
+a.jsonStringLink {
   color: #4272DB;
 }
 
@@ -87,13 +86,12 @@ a.jsonStringLink{
   color: #4272DB;
 }
 
-.jsonKey,
-.jsonObject,
-.jsonArray {
+.jsonKey,.jsonObject,.jsonArray {
   /* Reserved for future use. */
 }
 
 .responseLine {
+  /* Reserved for future use. */
 }
 
 .addParameter {
@@ -119,4 +117,10 @@ a.jsonStringLink{
 
 .invalidParameter {
   background-color: #ffb2b2;
+}
+
+.clickable {
+  color: #4272DB;
+  text-decoration: underline;
+  cursor: pointer;
 }

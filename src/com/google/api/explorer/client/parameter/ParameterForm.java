@@ -25,7 +25,9 @@ import com.google.api.explorer.client.base.ApiParameter;
 import com.google.api.explorer.client.base.Schema;
 import com.google.api.explorer.client.editors.Editor;
 import com.google.api.explorer.client.editors.EditorFactory;
+import com.google.api.explorer.client.parameter.schema.FieldsEditor;
 import com.google.api.explorer.client.parameter.schema.SchemaForm;
+import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -35,6 +37,7 @@ import com.google.common.collect.Multimap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -44,12 +47,14 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -57,6 +62,8 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+
+import javax.annotation.Nullable;
 
 /**
  * View of the parameter form UI.
@@ -67,36 +74,41 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
 
   // Set of HTTP methods that do not take a request body. If the method being
   // shown is of this type, the body textarea should be hidden.
-  public static final Set<HttpMethod> HIDE_BODY_METHODS =
-      EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+  public static final Set<HttpMethod> HIDE_BODY_METHODS = EnumSet.of(HttpMethod.GET,
+      HttpMethod.HEAD);
 
   private static ParameterFormUiBinder uiBinder = GWT.create(ParameterFormUiBinder.class);
 
   interface ParameterFormUiBinder extends UiBinder<Widget, ParameterForm> {
   }
 
-  @UiField public Label noParams;
   @UiField public FlexTable table;
   @UiField public Label bodyDisclosure;
-  @UiField public PopupPanel popupPanel;
-  @UiField public Button close;
   @UiField public InlineLabel requiredDescription;
   @UiField public Button submit;
   @UiField public ImageElement executing;
+
+  @UiField public PopupPanel popupPanel;
   @UiField(provided = true) public SchemaForm schemaForm;
   @UiField public RadioButton selectSchemaButton;
   @UiField public RadioButton selectBasicButton;
   @UiField public TextArea requestBody;
+  @UiField public Button close;
+
+  // Whether or not the basic textbox request body editor should be used.
+  private boolean useBasicEditor = false;
+  private static final String ADD_REQ_BODY = "Add request body";
+  private static final String CHANGE_REQ_BODY = "Change request body";
+
+  @UiField public PopupPanel fieldsPopupPanel;
+  @UiField public HTMLPanel fieldsPlaceholder;
+  @UiField public Button closeFields;
+  private FieldsEditor fieldsEditor;
+  private TextBox fieldsTextBox = new TextBox();
 
   private final AppState appState;
   private final ParameterFormPresenter presenter;
   private final CellFormatter cellFormatter;
-
-  private static final String ADD_REQ_BODY = "Add request body";
-  private static final String CHANGE_REQ_BODY = "Change request body";
-  
-  // Whether or not the basic textbox request body editor should be used.
-  private boolean useBasicEditor = false;
 
   /**
    * Bi-directional mapping between parameter name -> editor responsible for
@@ -112,13 +124,16 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
     cellFormatter = table.getCellFormatter();
     this.presenter = new ParameterFormPresenter(eventBus, appState, authManager, this);
 
-    executing.setSrc(Resources.INSTANCE.miniLoading().getURL());
+    executing.setSrc(Resources.INSTANCE.miniLoading().getSafeUri().asString());
     UIObject.setVisible(executing, false);
 
     popupPanel.show();
     popupPanel.hide();
 
-   selectSchemaButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+    fieldsPopupPanel.show();
+    fieldsPopupPanel.hide();
+
+    selectSchemaButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
       @Override
       public void onValueChange(ValueChangeEvent<Boolean> event) {
         selectSchema();
@@ -154,8 +169,13 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
     popupPanel.hide();
   }
 
+  @UiHandler("closeFields")
+  public void closeFields(ClickEvent event) {
+    fieldsPopupPanel.hide();
+    fieldsTextBox.setText(fieldsEditor.genFieldsString());
+  }
+
   public void selectSchema() {
-    selectSchemaButton.setEnabled(true);
     selectSchemaButton.setValue(true);
     schemaForm.setVisible(true);
     requestBody.setVisible(false);
@@ -174,9 +194,7 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
   public void setMethod(ApiMethod method, SortedMap<String, ApiParameter> sortedParams) {
     requiredDescription.setVisible(false);
     boolean hasParameters = !(sortedParams == null || sortedParams.isEmpty());
-    noParams.setVisible(!hasParameters);
     bodyDisclosure.setText(ADD_REQ_BODY);
-    bodyDisclosure.setVisible(!HIDE_BODY_METHODS.contains(method.getHttpMethod()));
 
     table.clear(true);
     while (table.getRowCount() > 0) {
@@ -185,10 +203,9 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
     table.setVisible(hasParameters);
 
     nameToEditor.clear();
-    requestBody.setText("");
 
+    int row = 0;
     if (hasParameters) {
-      int row = 0;
       for (Map.Entry<String, ApiParameter> entry : sortedParams.entrySet()) {
         String paramName = entry.getKey();
         ApiParameter param = entry.getValue();
@@ -197,14 +214,19 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
       }
     }
 
-    // Call selectSchema() to reset enabled/visible state of form.
+    // Add a row for the fields parameter.
+    Schema responseSchema = appState.getCurrentService().responseSchema(method);
+    addFieldsRow(responseSchema, row);
+
+    // Reset to having the Guided View selected
     selectSchema();
+    requestBody.setText("");
     Schema requestSchema = appState.getCurrentService().requestSchema(method);
+    bodyDisclosure.setVisible(requestSchema != null);
     if (requestSchema != null) {
       schemaForm.setSchema(requestSchema);
     } else {
-      selectBasic();
-      selectSchemaButton.setEnabled(false);
+      useBasicEditor = true;
     }
   }
 
@@ -242,6 +264,71 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
     cellFormatter.addStyleName(row, 1, Resources.INSTANCE.style().parameterFormDescriptionCell());
   }
 
+  /**
+   * Adds a row to the table to edit the partial fields mask.
+   * 
+   * @param responseSchema Definition of the response object being described.
+   * @param row Row index to begin adding rows to the parameter form table.
+   */
+  private void addFieldsRow(@Nullable Schema responseSchema, int row) {
+    fieldsPlaceholder.clear();
+
+    table.setText(row, 0, "fields =");
+
+    // Reset the fields textbox's value to empty and add it to the table (with
+    // appropriate styling)
+    fieldsTextBox.setText("");
+    table.setWidget(row, 1, fieldsTextBox);
+    cellFormatter.setStyleName(row, 0, Resources.INSTANCE.style().parameterFormNameCell());
+    cellFormatter.setStyleName(row, 1, Resources.INSTANCE.style().parameterFormTextBoxCell());
+
+    // Start adding the next row which will have the description of this param,
+    // and potentially a link to open the fields editor.
+    row++;
+    HTMLPanel panel = new HTMLPanel("");
+
+    appState.getCurrentService().getParameters().get("fields").getDescription();
+    panel.add(new InlineLabel(getFieldsDescription()));
+
+    // If a response schema is provided, add a link to the fields editor and
+    // tell the fields editor about this method's response schema.
+    if (responseSchema != null) {
+      Label openFieldsEditor = new Label("Open fields editor");
+      openFieldsEditor.addStyleName(Resources.INSTANCE.style().clickable());
+      openFieldsEditor.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          fieldsPopupPanel.show();
+          fieldsPopupPanel.center();
+        }
+      });
+      panel.add(openFieldsEditor);
+
+      fieldsEditor = new FieldsEditor(appState, /* This is the root, no field name req'd */"");
+      fieldsEditor.setProperties(responseSchema.getProperties());
+      fieldsPlaceholder.add(fieldsEditor);
+    }
+
+    // Add the description (and maybe fields editor link) to the table.
+    table.setWidget(row, 1, panel);
+    cellFormatter.addStyleName(row, 1, Resources.INSTANCE.style().parameterFormDescriptionCell());
+  }
+
+  /** Returns the description of the global "fields" parameter, if it exists. */
+  private String getFieldsDescription() {
+    Map<String, ApiParameter> parameters = appState.getCurrentService().getParameters();
+    if (parameters == null) {
+      return "";
+    }
+
+    ApiParameter parameter = parameters.get("fields");
+    if (parameter == null) {
+      return "";
+    }
+
+    return Strings.nullToEmpty(parameter.getDescription());
+  }
+
   /** Return a {@link Map} of parameter keys to values as specified by the user. */
   @Override
   public Multimap<String, String> getParameterValues() {
@@ -250,6 +337,11 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
       Editor editor = entry.getValue();
       editor.displayValidation();
       values.putAll(entry.getKey(), editor.getValue());
+    }
+
+    String fields = this.fieldsTextBox.getText();
+    if (!fields.isEmpty()) {
+      values.put("fields", fields);
     }
     return values;
   }
@@ -275,6 +367,7 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
 
   @Override
   public String getBodyText() {
-    return useBasicEditor ? requestBody.getText() : schemaForm.getStringValue();
+    String body = useBasicEditor ? requestBody.getText() : schemaForm.getStringValue();
+    return body.equals("{}") ? "" : body;
   }
 }

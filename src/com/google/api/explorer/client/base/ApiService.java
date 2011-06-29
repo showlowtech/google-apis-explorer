@@ -64,6 +64,9 @@ public interface ApiService extends HasMethodsAndResources {
    * authentication information.
    */
   Map<String, AuthInformation> getAuth();
+  
+  /** {@link Map} of global parameters for all methods in this service. */
+  Map<String, ApiParameter> getParameters();
 
   /**
    * Represents an API service resource containing methods to call and possibly
