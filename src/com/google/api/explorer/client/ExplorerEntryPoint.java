@@ -42,10 +42,6 @@ public class ExplorerEntryPoint implements EntryPoint {
   /** The name of this application. */
   public static final String APP_NAME = "Google APIs Explorer";
 
-  /** Path to the Directory listing all APIs. */
-  private static final String DIRECTORY_REQUEST_PATH =
-      "/discovery/" + ApiServiceFactory.DISCOVERY_VERSION + "/apis";
-
   @Override
   public void onModuleLoad() {
     // Make sure that CSS gets applied.
@@ -72,7 +68,7 @@ public class ExplorerEntryPoint implements EntryPoint {
     RootLayoutPanel.get().add(new FullView(eventBus, appState, authManager));
 
     // Request the list of APIs to display from the Directory API.
-    ApiRequest request = new ApiRequest(DIRECTORY_REQUEST_PATH);
+    ApiRequest request = new ApiRequest(Config.DIRECTORY_REQUEST_PATH);
     request.send(new DefaultAsyncCallback<ApiResponse>() {
       @Override
       public void onSuccess(ApiResponse response) {

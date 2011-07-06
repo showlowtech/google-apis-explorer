@@ -17,6 +17,7 @@
 package com.google.api.explorer.client.base;
 
 import com.google.common.base.Strings;
+import com.google.gwt.user.client.Window;
 
 /**
  * Class containing constants and configuration values for the library.
@@ -25,12 +26,21 @@ import com.google.common.base.Strings;
  */
 public abstract class Config {
 
+  public static final String AUTH_URL = "https://accounts.google.com/o/oauth2/auth";
+  public static final String CLIENT_ID = "835264079878.apps.googleusercontent.com";
   public static final String DEFAULT_BASE_URL = "https://www.googleapis.com";
 
+  /** Path to the Directory listing all APIs. */
+  public static final String DIRECTORY_REQUEST_PATH =
+      "/discovery/" + ApiServiceFactory.DISCOVERY_VERSION + "/apis";
+
   private static final String VERSION = "0.1-alpha";
+  private static final String PRIVATE_API_KEY = "tt";
+
   private static String baseUrl = DEFAULT_BASE_URL;
   private static String userAgent = "google-api-gwt-client/" + VERSION;
   private static String apiKey = "";
+  private static String discoveryAuthToken = null;
 
   private Config() {
   } // Not instantiable.
@@ -71,5 +81,26 @@ public abstract class Config {
   /** Get the API key to use for requests from this application. */
   public static String getApiKey() {
     return Strings.nullToEmpty(apiKey);
+  }
+
+  /** Set the OAuth2 token to use when making Discovery requests. */
+  public static void setDiscoveryAuthToken(String token) {
+    Config.discoveryAuthToken = token;
+  }
+
+  /**
+   * Returns the OAuth2 token to use when making Discovery requests, or
+   * {@code null} if none was specified.
+   */
+  public static String getDiscoveryAuthToken() {
+    return Config.discoveryAuthToken;
+  }
+
+  /**
+   * Returns whether or not the Private APIs UI is enabled in the Explorer.
+   * @return
+   */
+  public static boolean isPrivateApiEnabled() {
+    return Window.Location.getParameter(PRIVATE_API_KEY) != null;
   }
 }

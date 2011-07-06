@@ -17,6 +17,14 @@
 package com.google.api.explorer.client;
 
 import com.google.api.explorer.client.auth.AuthView;
+import com.google.api.explorer.client.base.ApiRequest;
+import com.google.api.explorer.client.base.ApiResponse;
+import com.google.api.explorer.client.base.ApiService;
+import com.google.api.explorer.client.base.ApiService.AuthInformation;
+import com.google.api.explorer.client.base.ApiService.AuthScope;
+import com.google.api.explorer.client.base.ApiServiceFactory;
+import com.google.api.explorer.client.base.Config;
+import com.google.api.explorer.client.base.DefaultAsyncCallback;
 import com.google.api.explorer.client.event.MethodSelectedEvent;
 import com.google.api.explorer.client.event.ServiceDefinitionsLoadedEvent;
 import com.google.api.explorer.client.event.ServiceLoadedEvent;
@@ -27,6 +35,10 @@ import com.google.api.explorer.client.method.MethodSelector;
 import com.google.api.explorer.client.parameter.ParameterForm;
 import com.google.api.explorer.client.service.ServiceSelector;
 import com.google.api.explorer.client.version.VersionSelector;
+import com.google.api.gwt.oauth2.client.Auth;
+import com.google.api.gwt.oauth2.client.AuthRequest;
+import com.google.api.gwt.oauth2.client.Callback;
+import com.google.common.collect.Iterables;
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -37,12 +49,15 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+
+import java.util.Map;
 
 /**
  * View of the whole app.
@@ -62,6 +77,13 @@ public class FullView extends Composite
   // template.
   private static final int SELECTOR_PANEL_SIZE = 306;
 
+  // OAuth2 scope to use when making a request for private APIs.
+  // TODO(jasonhall): When we know what scope URL to put here, just hard-code it
+  // and don't jump through the hoop of looking it up in Discovery itself. This
+  // is just a short-term solution so that the code can start working as soon as
+  // possible.
+  private static String discoveryAuthScope = null;
+
   private static FullViewUiBinder uiBinder = GWT.create(FullViewUiBinder.class);
 
   interface FullViewUiBinder extends UiBinder<Widget, FullView> {
@@ -69,6 +91,7 @@ public class FullView extends Composite
 
   @UiField DockLayoutPanel dockLayoutPanel;
   @UiField Image logo;
+  @UiField Image tt;
   @UiField HTMLPanel selectorPanel;
   @UiField(provided = true) AuthView authView;
   @UiField TableCellElement serviceColumn;
@@ -106,6 +129,8 @@ public class FullView extends Composite
     }
   };
 
+  private final EventBus eventBus;
+
   public FullView(EventBus eventBus, AppState appState, AuthManager authManager) {
     Scheduler scheduler = Scheduler.get();
     this.authView = new AuthView(eventBus, authManager);
@@ -116,6 +141,8 @@ public class FullView extends Composite
 
     initWidget(uiBinder.createAndBindUi(this));
 
+    this.eventBus = eventBus;
+
     dockLayoutPanel.add(new HistoryPanel(eventBus, appState));
 
     eventBus.addHandler(ServiceLoadedEvent.TYPE, this);
@@ -123,6 +150,33 @@ public class FullView extends Composite
     eventBus.addHandler(MethodSelectedEvent.TYPE, this);
     eventBus.addHandler(ServiceDefinitionsLoadedEvent.TYPE, this);
     eventBus.addHandler(VersionSelectedEvent.TYPE, this);
+
+    // If Private APIs UI is enabled, make a request to find out the
+    // Discovery auth scope to use, and set the private API icon visible.
+    if (Config.isPrivateApiEnabled()) {
+      final String oauth2Key = "oauth2";
+      ApiServiceFactory.INSTANCE.create("discovery", "v1", new AsyncCallback<ApiService>() {
+        @Override
+        public void onSuccess(ApiService result) {
+          Map<String, AuthInformation> auth = result.getAuth();
+          if (auth != null && auth.containsKey(oauth2Key)) {
+            Map<String, AuthScope> scopes = auth.get(oauth2Key).getScopes();
+            if (!scopes.isEmpty()) {
+              // TODO(jasonhall): This value is a constant. When we know it,
+              // just hard-code it.
+              discoveryAuthScope = Iterables.getOnlyElement(scopes.keySet());
+              tt.setVisible(true);
+            }
+          }
+        }
+
+        @Override
+        public void onFailure(Throwable caught) {
+          // Ignore failures in fetching Discovery here, we'll just keep the
+          // lock icon hidden.
+        }
+      });
+    }
   }
 
   /** Go back to the "home" state of the app when the logo is clicked. */
@@ -139,6 +193,45 @@ public class FullView extends Composite
       hideMethodPanelAnimation.run(ANIMATION_DURATION);
     }
     hidden = !hidden;
+  }
+
+  @SuppressWarnings("deprecation")
+  @UiHandler("tt")
+  void authWithDiscovery(ClickEvent event) {
+    if (discoveryAuthScope == null) {
+      return;
+    }
+
+    // When the private APIs lock icon is clicked, display the OAuth 2.0 popup
+    // prompt with the discovery auth scope.
+    AuthRequest req =
+        new AuthRequest(Config.AUTH_URL, Config.CLIENT_ID).withScopes(discoveryAuthScope);
+
+    Auth.get().login(req, new Callback<String, Throwable>() {
+      @Override
+      public void onSuccess(String token) {
+        // When the user grants access to auth'd Discovery, make a request
+        // using the new token to get the full list of APIs, then display them
+        // in the service selector (by firing a service definitions loaded
+        // event).
+        Config.setDiscoveryAuthToken(token);
+        ApiRequest request = new ApiRequest(Config.DIRECTORY_REQUEST_PATH);
+        request.send(new DefaultAsyncCallback<ApiResponse>() {
+          @Override
+          public void onSuccess(ApiResponse response) {
+            ApiDirectory directory = ApiDirectory.Helper.fromString(response.body);
+            eventBus.fireEvent(new ServiceDefinitionsLoadedEvent(directory.getItems()));
+            tt.setVisible(false);
+          }
+        });
+      }
+
+      @Override
+      public void onFailure(Throwable caught) {
+        // Ignore failures in granting access, the user can just click the icon
+        // again to start over.
+      }
+    });
   }
 
   @Override

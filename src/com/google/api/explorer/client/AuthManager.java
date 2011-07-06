@@ -17,6 +17,7 @@
 package com.google.api.explorer.client;
 
 import com.google.api.explorer.client.base.ApiService;
+import com.google.api.explorer.client.base.Config;
 import com.google.api.explorer.client.event.AuthGrantedEvent;
 import com.google.api.explorer.client.event.AuthRequestedEvent;
 import com.google.api.gwt.oauth2.client.Auth;
@@ -35,8 +36,6 @@ import java.util.Map;
  */
 public class AuthManager implements AuthRequestedEvent.Handler {
 
-  private static final String AUTH_URL = "https://accounts.google.com/o/oauth2/auth";
-  private static final String CLIENT_ID = "835264079878.apps.googleusercontent.com";
   private static final Map<ApiService, String> AUTH_TOKENS = Maps.newHashMap();
   private final EventBus eventBus;
   private final AppState appState;
@@ -53,7 +52,7 @@ public class AuthManager implements AuthRequestedEvent.Handler {
 
     // TODO(jasonhall): Show some indication that auth is in progress here.
 
-    AuthRequest req = new AuthRequest(AUTH_URL, CLIENT_ID).withScopes(event.scope);
+    AuthRequest req = new AuthRequest(Config.AUTH_URL, Config.CLIENT_ID).withScopes(event.scope);
 
     Auth.get().login(req, new Callback<String, Throwable>() {
       @Override
