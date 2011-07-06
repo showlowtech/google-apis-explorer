@@ -101,7 +101,10 @@
   <g:HTMLPanel>
     <g:DockLayoutPanel ui:field="dockLayoutPanel" styleName="{style.dockLayoutPanel}">
       <g:north size="55">
-        <g:Image ui:field="logo" styleName="{style.logo}" resource="{res.logo}" />
+        <g:HTMLPanel>
+          <g:Image ui:field="logo" styleName="{style.logo}" resource="{res.logo}" />
+          <g:Image ui:field="tt" styleName="{style.logo}" resource="{res.lock}" visible="false" />
+        </g:HTMLPanel>
       </g:north>
       <g:north size="306">
         <g:HTMLPanel ui:field="selectorPanel">

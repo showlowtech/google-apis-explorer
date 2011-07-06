@@ -63,6 +63,9 @@ public interface Resources extends ClientBundle {
   @Source(PATH + "add.png")
   ImageResource add();
 
+  @Source(PATH + "lock.png")
+  ImageResource lock();
+
   @Source(PATH + "explorer.css")
   Css style();
 
