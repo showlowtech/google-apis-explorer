@@ -29,7 +29,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.List;
@@ -51,10 +51,8 @@ class ArraySchemaEditor extends Composite implements SchemaEditor {
   private final Property items;
   private final List<SchemaEditor> editors = Lists.newArrayList();
 
-  @UiField
-  HTMLPanel panel;
-  @UiField
-  Image newItem;
+  @UiField HTMLPanel panel;
+  @UiField InlineLabel newItem;
 
   ArraySchemaEditor(SchemaForm schemaForm, Property items) {
     initWidget(uiBinder.createAndBindUi(this));

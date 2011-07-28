@@ -3,13 +3,12 @@
   <ui:with field="res" type="com.google.api.explorer.client.Resources" />
   <ui:style>
     .remove {
-      cursor: pointer;
-      float: left;
+      font-family: sans-serif;
+      font-size: .7em;
     }
   </ui:style>
   <g:HTMLPanel>
-    <g:Image ui:field="remove" styleName="{style.remove}" resource="{res.remove}"
-        title="Remove this element from the array" />
     <g:HTMLPanel ui:field="placeholder" />
+    <g:InlineLabel ui:field="remove" styleName="{res.style.clickable} {style.remove}">Remove</g:InlineLabel>
   </g:HTMLPanel>
 </ui:UiBinder> 

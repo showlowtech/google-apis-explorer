@@ -23,7 +23,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -40,9 +39,10 @@ public class ObjectElement extends Composite {
   interface RowUiBinder extends UiBinder<Widget, ObjectElement> {
   }
 
+  @UiField HTMLPanel panel;
   @UiField InlineLabel label;
   @UiField HTMLPanel placeholder;
-  @UiField Image remove;
+  @UiField InlineLabel remove;
 
   final String key;
 
@@ -53,5 +53,17 @@ public class ObjectElement extends Composite {
     label.setText("\"" + key + "\"");
     label.setTitle(property.getDescription());
     placeholder.add(editor.render(property));
+
+    // If the editor is not an Object or Array editor, it can contain inner
+    // elements, and will have its own inner remove link to manage them. If
+    // that's the case, move the remove link to after the editor.
+    if (!(editor instanceof ObjectSchemaEditor) && !(editor instanceof ArraySchemaEditor)) {
+      moveRemoveAfterEditor();
+    }
+  }
+
+  private void moveRemoveAfterEditor() {
+    panel.remove(remove);
+    panel.add(remove);
   }
 }

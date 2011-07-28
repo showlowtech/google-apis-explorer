@@ -3,8 +3,9 @@
   <ui:with field="res" type="com.google.api.explorer.client.Resources" />
   <ui:style>
     .newItem {
-      cursor: pointer;
       margin-left: 20px;
+      font-family: sans-serif;
+      font-size: .7em;
     }
 
     .panel {
@@ -14,8 +15,8 @@
   <g:HTMLPanel>
     [
     <g:HTMLPanel ui:field="panel" styleName="{style.panel}" />
-    <g:Image ui:field="newItem" styleName="{style.newItem}" resource="{res.add}"
-        title="Add a new element to this array" />
+    <g:InlineLabel ui:field="newItem"
+      styleName="{res.style.clickable} {style.newItem}">Add</g:InlineLabel>
     <div>]</div>
   </g:HTMLPanel>
 </ui:UiBinder>
