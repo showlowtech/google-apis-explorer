@@ -80,6 +80,7 @@ public class ParameterFormPresenter implements MethodSelectedEvent.Handler,
     this.display = display;
   }
 
+  @Override
   public void onMethodSelected(final MethodSelectedEvent event) {
     this.method = event.method;
 
@@ -112,10 +113,6 @@ public class ParameterFormPresenter implements MethodSelectedEvent.Handler,
     Preconditions.checkState(method != null);
     final ApiRequest req =
         new ApiRequest(appState.getCurrentService(), appState.getCurrentMethodIdentifier());
-
-    // Disable client-side validation so that errors resulting from invalid
-    // parameters can be displayed in the response.
-    req.enableClientSideValidation = false;
 
     // If the user has declared a body, set it on the request.
     String body = display.getBodyText();
