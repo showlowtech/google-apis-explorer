@@ -17,7 +17,6 @@
 package com.google.api.explorer.client.base;
 
 import com.google.api.explorer.client.base.ApiMethod.HttpMethod;
-import com.google.api.explorer.client.base.ApiParameter.Type;
 import com.google.api.explorer.client.base.http.TimeoutException;
 import com.google.api.explorer.client.base.http.crossdomain.CrossDomainRequest;
 import com.google.api.explorer.client.base.http.crossdomain.CrossDomainRequestBuilder;
@@ -31,11 +30,7 @@ import com.google.common.collect.Multimap;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -106,17 +101,6 @@ public class ApiRequest {
   public final String requestPath;
 
   /**
-   * Whether or not requests should be validated in the client before being sent
-   * to the server. By default, this is {@code true}.
-   *
-   * <p>
-   * If this is {@code false}, validation will be skipped and the
-   * {@link #validate()} will always succeed.
-   * </p>
-   */
-  public boolean enableClientSideValidation = true;
-
-  /**
    * Reference to the underlying HTTP request being made, so that it can be
    * canceled. This will be null until the request is sent.
    */
@@ -166,112 +150,6 @@ public class ApiRequest {
   }
 
   /**
-   * Performs validation of the parameter values given in {@link #paramValues}
-   * against the requirements defined in the method's {@link ApiParameter} s.
-   * This method is called immediately before sending a request when
-   * {@link #send(AsyncCallback)} is called.
-   *
-   * <p>
-   * If {@link #enableClientSideValidation} is {@code false}, or if the request
-   * was constructed with an explicit request path (i.e., by using
-   * {@link #ApiRequest(String)}, then this method will always succeed.
-   * </p>
-   */
-  public void validate() {
-    if (!enableClientSideValidation || method == null) {
-      return;
-    }
-
-    Map<String, ApiParameter> paramSpecs = method.getParameters();
-
-    for (Map.Entry<String, ApiParameter> entry : paramSpecs.entrySet()) {
-      String paramName = entry.getKey();
-      // Check that required parameters have a parameter value specified.
-      if (entry.getValue().isRequired()) {
-        Preconditions.checkArgument(
-            paramValues.containsKey(paramName) && !paramValues.get(paramName).isEmpty(),
-            "[" + paramName + "] is required, and must be given a value.");
-      }
-    }
-
-    for (Map.Entry<String, Collection<String>> entry : paramValues.asMap().entrySet()) {
-      String paramName = entry.getKey();
-      // Skip validation of extraneous parameter values.
-      if (!paramSpecs.containsKey(paramName)) {
-        continue;
-      }
-
-      ApiParameter paramSpec = paramSpecs.get(paramName);
-
-      // Check that only repeated parameters are given multiple values.
-      Preconditions.checkArgument(paramSpec.isRepeated() || paramValues.get(paramName).size() == 1,
-          "[" + paramName + "] is not a repeated parameter, and cannot be given multiple values.");
-
-      String pattern = paramSpec.getPattern();
-      List<String> enumValues = paramSpec.getEnumValues();
-      Type type = paramSpec.getType();
-
-      Collection<String> values = entry.getValue();
-      for (String value : values) {
-        // Check that the value matches the pattern
-        Preconditions.checkArgument(pattern == null || value.matches(pattern),
-            "[" + paramName + "] does not match the required pattern: " + pattern);
-
-        // Check that the value is one of the defined enum values
-        Preconditions.checkArgument(enumValues == null || enumValues.contains(value),
-            "[" + paramName + "] is not one of the defined valid values: " + enumValues);
-
-        if (type != null) {
-          // Check that values are the correct type, and within defined bounds.
-          switch (type) {
-            case STRING:
-              // All values are valid strings
-              break;
-
-            case INTEGER:
-              BigInteger intVal;
-              try {
-                intVal = new BigInteger(value);
-              } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(
-                    "[" + paramName + "] is not a valid integer value.");
-              }
-
-              String intMinimum = paramSpec.getMinimum();
-              if (intMinimum != null) {
-                BigInteger min = new BigInteger(intMinimum);
-                Preconditions.checkArgument(intVal.compareTo(min) >= 0,
-                    "[" + paramName + "] is less than the allowable minimum: " + intMinimum);
-              }
-              String intMaximum = paramSpec.getMaximum();
-              if (intMaximum != null) {
-                BigInteger max = new BigInteger(intMaximum);
-                Preconditions.checkArgument(intVal.compareTo(max) <= 0,
-                    "[" + paramName + "] is greater than the allowable maximum: " + intMaximum);
-              }
-              break;
-
-            case DECIMAL:
-              BigDecimal decVal;
-              try {
-                decVal = new BigDecimal(value);
-              } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(
-                    "[" + paramName + "] is not a valid decimal value.");
-              }
-              break;
-
-            case BOOLEAN:
-              Preconditions.checkArgument(value.equals("true") || value.equals("false"),
-                  "[" + paramName + "] is not a valid boolean value.");
-              break;
-          }
-        }
-      }
-    }
-  }
-
-  /**
    * Set the timeout that all {@link ApiRequest}s should enforce. If the timeout
    * period ends before a response is received, a {@link TimeoutException} will
    * be raised.
@@ -293,7 +171,6 @@ public class ApiRequest {
    *        will be called if an error is encountered.
    */
   public void send(AsyncCallback<ApiResponse> callback) {
-    validate();
     setHeaders();
     maybeSetApiKeyParameter();
     this.innerRequest = HttpRequestBuilderHolder.REQUEST_BUILDER.makeRequest(this, callback);
@@ -350,12 +227,7 @@ public class ApiRequest {
 
       if (section.startsWith("{")) {
         String paramKey = section.substring(1, section.length() - 1);
-        if (!paramValues.containsKey(paramKey)) {
-          if (enableClientSideValidation) {
-            throw new IllegalArgumentException(
-                "Error generating path URL: Missing parameter value [" + paramKey + "]");
-          }
-        } else {
+        if (paramValues.containsKey(paramKey)) {
           // TODO(jasonhall): Investigate how to support repeated path
           // parameters, or throw an error here if it's not supported.
           sb.append(paramValues.get(paramKey).get(0));
