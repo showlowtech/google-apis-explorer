@@ -92,7 +92,7 @@
 
     .fields {
       width: 400px;
-      max-height: 500px;
+      max-height: 300px;
       overflow:auto;
     }
 

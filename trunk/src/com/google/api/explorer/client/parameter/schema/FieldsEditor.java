@@ -64,7 +64,7 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
     this.appState = appState;
     this.key = key;
     root = new CheckBox(key.isEmpty() ? "Select all/none" : key);
-    root.setValue(true);
+    root.setValue(false);
     root.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
       @Override
       public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -76,6 +76,9 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
     add(root);
   }
 
+  /**
+   * Sets the properties this field will have, if it is an object.
+   */
   public void setProperties(Map<String, Property> properties) {
     List<String> keys = Lists.newArrayList(properties.keySet());
     Collections.sort(keys);
@@ -91,7 +94,7 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
       if (childProperties == null && items == null) {
         // This is a simple field
         CheckBox checkBox = new CheckBox(childKey);
-        checkBox.setValue(true);
+        checkBox.setValue(root.getValue());
         checkBox.setTitle(property.getDescription());
         children.put(childKey, checkBox);
         checkBox.getElement().appendChild(Document.get().createBRElement());
@@ -118,6 +121,10 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
     add(inner);
   }
 
+  /**
+   * Denotes that this is an object whose definition is in another Schema, and
+   * that it should be filled in with the correct fields when expanded.
+   */
   void setRef(final String ref) {
     final InlineLabel expando = new InlineLabel("+");
     add(expando);
@@ -133,6 +140,7 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
     });
   }
 
+  /** Returns the string for this field, including sub-fields if it has any. */
   public String genFieldsString() {
     // If there are no children, that means it's an expandable item that is not
     // expanded. Return just the key in this case.
@@ -185,6 +193,10 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
     return sb.toString();
   }
 
+  /**
+   * Returns this field's checked value, or if it has children, whether all its
+   * children are checked.
+   */
   @Override
   public Boolean getValue() {
     if (children.isEmpty()) {
@@ -200,6 +212,9 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
         });
   }
 
+  /**
+   * Sets this field's checked value, and all of its childrens' if it has any.
+   */
   @Override
   public void setValue(Boolean value) {
     for (HasValue<Boolean> hasValue : children.values()) {
@@ -208,11 +223,13 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
     this.root.setValue(value);
   }
 
+  /** Adds a ValueChangeHandler to this field. */
   @Override
   public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Boolean> handler) {
     return root.addValueChangeHandler(handler);
   }
 
+  /** Sets this checkboxes value. */
   @Override
   public void setValue(Boolean value, boolean fireEvents) {
     root.setValue(value, fireEvents);
