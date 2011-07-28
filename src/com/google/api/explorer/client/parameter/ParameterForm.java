@@ -93,28 +93,28 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
   @UiField public Button close;
 
   // Whether or not the basic textbox request body editor should be used.
-  private static final String ADD_REQ_BODY = "Add request body";
+  protected static final String ADD_REQ_BODY = "Add request body";
   private static final String CHANGE_REQ_BODY = "Change request body";
 
   @UiField public PopupPanel fieldsPopupPanel;
   @UiField public HTMLPanel fieldsPlaceholder;
   @UiField public Button closeFields;
-  private FieldsEditor fieldsEditor;
-  private TextBox fieldsTextBox = new TextBox();
+  protected FieldsEditor fieldsEditor;
+  protected TextBox fieldsTextBox = new TextBox();
 
-  private final AppState appState;
+  protected final AppState appState;
   private final ParameterFormPresenter presenter;
-  private final CellFormatter cellFormatter;
+  protected final CellFormatter cellFormatter;
 
   /**
    * Bi-directional mapping between parameter name -> editor responsible for
    * providing that parameter's value.
    */
-  private BiMap<String, Editor> nameToEditor = HashBiMap.create();
+  protected BiMap<String, Editor> nameToEditor = HashBiMap.create();
 
   public ParameterForm(EventBus eventBus, AppState appState, AuthManager authManager) {
     schemaForm = new SchemaForm(appState);
-    initWidget(uiBinder.createAndBindUi(this));
+    initWidget();
 
     this.appState = appState;
     cellFormatter = table.getCellFormatter();
@@ -280,7 +280,7 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
   }
 
   /** Returns the description of the global "fields" parameter, if it exists. */
-  private String getFieldsDescription() {
+  protected String getFieldsDescription() {
     Map<String, ApiParameter> parameters = appState.getCurrentService().getParameters();
     if (parameters == null) {
       return "";

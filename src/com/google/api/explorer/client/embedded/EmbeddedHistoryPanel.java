@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2010 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,6 +17,8 @@
 package com.google.api.explorer.client.embedded;
 
 import com.google.api.explorer.client.AppState;
+import com.google.api.explorer.client.base.ApiRequest;
+import com.google.api.explorer.client.base.ApiResponse;
 import com.google.api.explorer.client.history.HistoryItem;
 import com.google.api.explorer.client.history.HistoryPanelPresenter;
 import com.google.gwt.core.client.GWT;
@@ -30,7 +32,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * View to display and manage {@link HistoryItem}s for requests that have been
  * made.
- *
+ * 
  * @author jasonhall@google.com (Jason Hall)
  */
 public class EmbeddedHistoryPanel extends Composite implements HistoryPanelPresenter.Display {
@@ -41,7 +43,8 @@ public class EmbeddedHistoryPanel extends Composite implements HistoryPanelPrese
   interface EmbeddedHistoryPanelUiBinder extends UiBinder<Widget, EmbeddedHistoryPanel> {
   }
 
-  @UiField SimplePanel panel;
+  @UiField
+  SimplePanel panel;
 
   public EmbeddedHistoryPanel(EventBus eventBus, AppState appState) {
     initWidget(uiBinder.createAndBindUi(this));
@@ -69,5 +72,11 @@ public class EmbeddedHistoryPanel extends Composite implements HistoryPanelPrese
     panel.clear();
     panel.setVisible(true);
     panel.add(item);
+  }
+
+  @Override
+  public HistoryItem createItem(String methodIdentifier, long timeMillis, ApiRequest request,
+      ApiResponse response) {
+    return new EmbeddedHistoryItem(methodIdentifier, timeMillis, request, response);
   }
 }

@@ -35,6 +35,7 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.user.client.ui.UIObject;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,7 +46,7 @@ import java.util.Map.Entry;
  * @author jasonhall@google.com (Jason Hall)
  */
 // TODO(jasonhall): Add collapsible sections for objects and arrays.
-class JsonPrettifier {
+public class JsonPrettifier {
 
   // Indent one space per indentation level (matches real response)
   private static final int INDENT_BY = 1;
@@ -66,11 +67,13 @@ class JsonPrettifier {
   public static void syntaxHighlight(Element parent, String jsonString) {
     // Reset indentation (just in case)
     indent = 0;
-    
+
     // Don't bother syntax highlighting empty text.
-    if (Strings.isNullOrEmpty(jsonString)) {
+    boolean empty = Strings.isNullOrEmpty(jsonString);
+    if (empty) {
       return;
     }
+    UIObject.setVisible(parent, !empty);
     
     if (!GWT.isScript()) {
       // Syntax highlighting is *very* slow in Development Mode (~30s for large

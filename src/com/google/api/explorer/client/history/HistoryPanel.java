@@ -17,6 +17,8 @@
 package com.google.api.explorer.client.history;
 
 import com.google.api.explorer.client.AppState;
+import com.google.api.explorer.client.base.ApiRequest;
+import com.google.api.explorer.client.base.ApiResponse;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -84,5 +86,11 @@ public class HistoryPanel extends Composite implements HistoryPanelPresenter.Dis
     scrollPanel.scrollToLeft();
     scrollPanel.scrollToTop();
     ITEMS.add(item);
+  }
+
+  @Override
+  public HistoryItem createItem(String methodIdentifier, long timeMillis, ApiRequest request,
+      ApiResponse response) {
+    return new HistoryItem(methodIdentifier, timeMillis, request, response);
   }
 }

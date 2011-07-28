@@ -1,24 +1,55 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    xmlns:auth="urn:import:com.google.api.explorer.client.auth"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:embedded="urn:import:com.google.api.explorer.client.embedded">
+  xmlns:auth="urn:import:com.google.api.explorer.client.auth" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:embedded="urn:import:com.google.api.explorer.client.embedded">
   <ui:style>
+    .all {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+    }
+
     .auth {
       text-align: right;
       width: 100%;
+      background-color: #F7F7F7;
+      height: 36px;
+      padding-top: 13px;
     }
 
     .history {
       width: 100%;
       overflow-y: auto;
     }
+
+    ::-webkit-scrollbar {
+      width: 15px;
+      height: 15px;
+      background: transparent;
+      overflow: visible;
+    }
+
+    ::-webkit-scrollbar-thumb:vertical,
+    ::-webkit-scrollbar-thumb:horizontal {
+      height: 1px;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-right: 4px solid #FFF;
+      border-left: 4px solid #FFF;
+      border-top: 6px solid #FFF;
+      border-bottom: 6px solid #FFF;
+    }
+
+    ::-webkit-scrollbar-thumb:vertical:hover,
+    ::-webkit-scrollbar-thumb:horizontal:hover
+      {
+      background-color: rgba(0, 0, 0, 0.4);
+    }
   </ui:style>
-  <g:HTMLPanel>
+  <g:HTMLPanel styleName="{style.all}">
     <div>
       <auth:AuthView styleName="{style.auth} auth" ui:field="authView" />
       <embedded:EmbeddedParameterForm ui:field="parameterForm" />
     </div>
-    <embedded:EmbeddedHistoryPanel styleName="{style.history} history-panel" ui:field="historyPanel" />
+    <embedded:EmbeddedHistoryPanel styleName="{style.history} history-panel"
+      ui:field="historyPanel" />
   </g:HTMLPanel>
 </ui:UiBinder>
