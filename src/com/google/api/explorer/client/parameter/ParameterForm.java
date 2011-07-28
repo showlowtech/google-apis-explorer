@@ -38,8 +38,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -52,7 +50,7 @@ import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.UIObject;
@@ -89,14 +87,12 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
   @UiField public ImageElement executing;
 
   @UiField public PopupPanel popupPanel;
+  @UiField public TabPanel tabPanel;
   @UiField(provided = true) public SchemaForm schemaForm;
-  @UiField public RadioButton selectSchemaButton;
-  @UiField public RadioButton selectBasicButton;
   @UiField public TextArea requestBody;
   @UiField public Button close;
 
   // Whether or not the basic textbox request body editor should be used.
-  private boolean useBasicEditor = false;
   private static final String ADD_REQ_BODY = "Add request body";
   private static final String CHANGE_REQ_BODY = "Change request body";
 
@@ -132,20 +128,6 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
 
     fieldsPopupPanel.show();
     fieldsPopupPanel.hide();
-
-    selectSchemaButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-      @Override
-      public void onValueChange(ValueChangeEvent<Boolean> event) {
-        selectSchema();
-      }
-    });
-
-    selectBasicButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-      @Override
-      public void onValueChange(ValueChangeEvent<Boolean> event) {
-        selectBasic();
-      }
-    });
   }
 
   protected void initWidget() {
@@ -175,43 +157,26 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
     fieldsTextBox.setText(fieldsEditor.genFieldsString());
   }
 
-  public void selectSchema() {
-    selectSchemaButton.setValue(true);
-    schemaForm.setVisible(true);
-    requestBody.setVisible(false);
-    useBasicEditor = false;
-  }
-
-  public void selectBasic() {
-    selectBasicButton.setValue(true);
-    schemaForm.setVisible(false);
-    requestBody.setVisible(true);
-    useBasicEditor = true;
-  }
-
   /** Sets the parameters displayed in the table. */
   @Override
   public void setMethod(ApiMethod method, SortedMap<String, ApiParameter> sortedParams) {
     requiredDescription.setVisible(false);
-    boolean hasParameters = !(sortedParams == null || sortedParams.isEmpty());
     bodyDisclosure.setText(ADD_REQ_BODY);
 
+    // Reset the table.
     table.clear(true);
     while (table.getRowCount() > 0) {
       table.removeRow(table.getRowCount() - 1);
     }
-    table.setVisible(hasParameters);
 
     nameToEditor.clear();
 
     int row = 0;
-    if (hasParameters) {
-      for (Map.Entry<String, ApiParameter> entry : sortedParams.entrySet()) {
-        String paramName = entry.getKey();
-        ApiParameter param = entry.getValue();
-        addEditorRow(paramName, param, row++);
-        addDescriptionRow(param, row++);
-      }
+    for (Map.Entry<String, ApiParameter> entry : sortedParams.entrySet()) {
+      String paramName = entry.getKey();
+      ApiParameter param = entry.getValue();
+      addEditorRow(paramName, param, row++);
+      addDescriptionRow(param, row++);
     }
 
     // Add a row for the fields parameter.
@@ -219,14 +184,14 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
     addFieldsRow(responseSchema, row);
 
     // Reset to having the Guided View selected
-    selectSchema();
+    tabPanel.selectTab(0 /* Guided View */);
     requestBody.setText("");
     Schema requestSchema = appState.getCurrentService().requestSchema(method);
-    bodyDisclosure.setVisible(requestSchema != null);
+    tabPanel.getTabBar().setTabEnabled(0 /* Guided View */, requestSchema != null);
     if (requestSchema != null) {
       schemaForm.setSchema(requestSchema);
     } else {
-      useBasicEditor = true;
+      tabPanel.selectTab(1 /* Basic View */);
     }
   }
 
@@ -367,7 +332,8 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
 
   @Override
   public String getBodyText() {
-    String body = useBasicEditor ? requestBody.getText() : schemaForm.getStringValue();
+    String body = tabPanel.getTabBar().getSelectedTab() == 0 /* Guided View */
+        ? schemaForm.getStringValue() : requestBody.getText();
     return body.equals("{}") ? "" : body;
   }
 }

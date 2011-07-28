@@ -28,12 +28,6 @@
       width: 100%;
     }
 
-    .section textarea {
-      width: 90%;
-      height: 100px;
-      margin: 5px;
-    }
-
     .body {
       overflow-x: hidden;
       overflow-y: auto;
@@ -99,16 +93,24 @@
         Show request body
       </g:Label>
 
-      <g:PopupPanel ui:field="popupPanel" autoHideEnabled="true" modal="true">
-        <g:HTMLPanel styleName="{style.popup} popup">
-          <div class="{style.popupTitle} title">Request body</div>
-          <div class="{style.popupBody} body">
+      <g:PopupPanel ui:field="popupPanel" modal="true">
+        <g:HTMLPanel styleName="{style.popup}">
+          <div class="{style.popupTitle}">Request body</div>
+          <div class="{style.popupBody}">
             <div class="{style.fieldsExplanation}">
                 Specify what will be sent in the HTTP request body.</div>
-            <g:RadioButton ui:field="selectSchemaButton" name="view" value="true">Guided view</g:RadioButton>
-            <g:RadioButton ui:field="selectBasicButton" name="view">Basic view</g:RadioButton>
-            <sch:SchemaForm ui:field="schemaForm" />
-            <g:TextArea ui:field="requestBody" visible="false" styleName="{style.requestBody}" />
+            <g:TabPanel ui:field="tabPanel">
+              <g:Tab text="Structured Editor">
+                <g:SimplePanel>
+                  <sch:SchemaForm ui:field="schemaForm" />
+                </g:SimplePanel>
+              </g:Tab>
+              <g:Tab text="Plain Text Editor">
+                <g:SimplePanel>
+                  <g:TextArea ui:field="requestBody" styleName="{style.requestBody}" />
+                </g:SimplePanel>
+              </g:Tab>
+            </g:TabPanel>
             <div>
               <g:Button ui:field="close">Close</g:Button>
             </div>

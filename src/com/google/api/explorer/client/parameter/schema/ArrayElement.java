@@ -21,7 +21,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -36,12 +36,11 @@ public class ArrayElement extends Composite {
   interface ArrayElementUiBinder extends UiBinder<Widget, ArrayElement> {
   }
 
-  @UiField Image remove;
+  @UiField InlineLabel remove;
   @UiField HTMLPanel placeholder;
 
   public ArrayElement(Widget rendered) {
     initWidget(uiBinder.createAndBindUi(this));
     placeholder.add(rendered);
   }
-
 }

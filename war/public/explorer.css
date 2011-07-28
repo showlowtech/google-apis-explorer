@@ -124,3 +124,56 @@ a.jsonStringLink {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/*
+ External (uncompiled) CSS rules
+ */
+
+html, body {
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+}
+
+@external .gwt-SuggestBoxPopup, .item-selected, .gwt-TabBarItem, .gwt-TabBarItem-selected,
+          .gwt-TabBarItem-disabled, .gwt-TabPanelBottom;
+
+.gwt-SuggestBoxPopup {
+  border: 1px solid #666;
+  background-color: #FFF;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.gwt-SuggestBoxPopup table {
+  border-spacing: 0 0;
+}
+
+.gwt-SuggestBoxPopup .item-selected {
+  background-color: #C9D7F1;
+}
+
+.gwt-TabBarItem {
+  padding: 5px 10px 3px 10px;
+  margin-left: 4px;
+  border-width: 1px 1px 0 1px;
+  border-style: solid;
+  border-color: #C9D7F1;
+  background-color: #F3F3F3;
+  cursor: pointer;
+  outline-width: 0px;
+}
+
+.gwt-TabBarItem-selected {
+  background-color: #C9D7F1;
+}
+
+.gwt-TabBarItem-disabled {
+  color: #666;
+}
+
+.gwt-TabPanelBottom {
+  background-color: #C9D7F1;
+  padding: 6px 5px 3px 5px;
+}

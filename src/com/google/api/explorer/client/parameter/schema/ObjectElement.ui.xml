@@ -3,17 +3,19 @@
   <ui:with field="res" type="com.google.api.explorer.client.Resources" />
   <ui:style>
     .remove {
-      cursor: pointer;
+      font-family: sans-serif;
+      font-size: .7em;
+      vertical-align: bottom;
     }
 
     .placeholder {
       display: inline;
     }
   </ui:style>
-  <g:HTMLPanel>
-    <g:Image ui:field="remove" styleName="{style.remove}" resource="{res.remove}"
-        title="Remove this property" />
+  <g:HTMLPanel ui:field="panel">
     <g:InlineLabel ui:field="label" />:
+    <g:InlineLabel ui:field="remove" styleName="{res.style.clickable} {style.remove}">
+      Remove</g:InlineLabel>
     <g:HTMLPanel ui:field="placeholder" styleName="{style.placeholder}" />
   </g:HTMLPanel>
 </ui:UiBinder>
