@@ -50,20 +50,21 @@ public class HistoryItem extends Composite {
   interface HistoryItemUiBinder extends UiBinder<Widget, HistoryItem> {
   }
 
-  @UiField FocusPanel titleBar;
-  @UiField SpanElement title;
-  @UiField SpanElement time;
-  @UiField DivElement collapseDiv;
-  @UiField SimplePanel errorPanel;
-  @UiField PreElement requestDiv;
-  @UiField PreElement requestBodyDiv;
-  @UiField PreElement statusDiv;
-  @UiField InlineLabel showHideHeaders;
-  @UiField PreElement responseHeadersDiv;
-  @UiField PreElement responseBodyDiv;
+  @UiField public FocusPanel titleBar;
+  @UiField public SpanElement title;
+  @UiField public SpanElement time;
+  @UiField public DivElement collapseDiv;
+  @UiField public SimplePanel errorPanel;
+  @UiField public PreElement requestDiv;
+  @UiField public PreElement requestBodyDiv;
+  @UiField public PreElement statusDiv;
+  @UiField public InlineLabel showHideHeaders;
+  @UiField public PreElement responseHeadersDiv;
+  @UiField public PreElement responseBodyDiv;
 
-  HistoryItem(String methodIdentifier, long timeMillis, ApiRequest request, ApiResponse response) {
-    initWidget(uiBinder.createAndBindUi(this));
+  protected HistoryItem(String methodIdentifier, long timeMillis, ApiRequest request,
+      ApiResponse response) {
+    initWidget();
     time.setInnerText("time to execute: " + timeMillis + " ms");
 
     String prefix = methodIdentifier + " executed ";
@@ -83,9 +84,13 @@ public class HistoryItem extends Composite {
     JsonPrettifier.syntaxHighlight(responseBodyDiv, response.body);
     JsonPrettifier.syntaxHighlight(requestBodyDiv, request.body);
   }
+  
+  protected void initWidget() {
+    initWidget(uiBinder.createAndBindUi(this));
+  }
 
   @UiHandler("showHideHeaders")
-  void showHide(ClickEvent event) {
+  public void showHide(ClickEvent event) {
     showHideHeaders.setText(
         UIObject.isVisible(responseHeadersDiv) ? "- Show headers -" : "- Hide headers -");
     UIObject.setVisible(responseHeadersDiv, !UIObject.isVisible(responseHeadersDiv));
@@ -125,7 +130,7 @@ public class HistoryItem extends Composite {
   }
 
   @UiHandler("titleBar")
-  void expandCollapse(ClickEvent event) {
+  public void expandCollapse(ClickEvent event) {
     if (UIObject.isVisible(collapseDiv)) {
       collapse();
     } else {

@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2010 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,6 +17,8 @@
 package com.google.api.explorer.client.history;
 
 import com.google.api.explorer.client.AppState;
+import com.google.api.explorer.client.base.ApiRequest;
+import com.google.api.explorer.client.base.ApiResponse;
 import com.google.api.explorer.client.base.dynamicjso.DynamicJso;
 import com.google.api.explorer.client.event.RequestFinishedEvent;
 import com.google.gwt.core.client.JsonUtils;
@@ -40,6 +42,9 @@ public class HistoryPanelPresenter implements RequestFinishedEvent.Handler {
 
     /** Remove the item at the given index. */
     public void removeItem(int index);
+
+    HistoryItem createItem(String methodIdentifier, long timeMillis, ApiRequest request,
+        ApiResponse response);
   }
 
   static final int MAX_HISTORY = 30;
@@ -64,10 +69,10 @@ public class HistoryPanelPresenter implements RequestFinishedEvent.Handler {
             + appState.getCurrentMethodIdentifier();
 
     HistoryItem item =
-        new HistoryItem(methodIdentifier, event.timeMillis, event.request, event.response);
+        display.createItem(methodIdentifier, event.timeMillis, event.request, event.response);
 
     String responseBody = event.response.body;
-    
+
     if (JsonUtils.safeToEval(event.response.body)) {
       DynamicJso jso = JsonUtils.safeEval(event.response.body);
       if (jso.get("error") != null) {

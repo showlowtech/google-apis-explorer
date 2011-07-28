@@ -30,7 +30,9 @@ public class AnalyticsManager implements RequestFinishedEvent.Handler {
   }
 
   public static native void trackPageview(String pageName) /*-{
-    $wnd._gaq.push(['_trackPageview', pageName]);
+    if ($wnd._gaq) {
+      $wnd._gaq.push(['_trackPageview', pageName]);
+    }
   }-*/;
 
   @Override

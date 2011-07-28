@@ -72,8 +72,9 @@ public class EmbeddedEntryPoint implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
-    // Make sure that CSS gets applied.
+    // Make sure that CSS gets injected.
     Resources.INSTANCE.style().ensureInjected();
+    EmbeddedResources.INSTANCE.style().ensureInjected();
 
     RootPanel root = RootPanel.get(EMBEDDING_ID);
 
