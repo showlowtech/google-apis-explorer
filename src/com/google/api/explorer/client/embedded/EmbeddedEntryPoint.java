@@ -19,7 +19,7 @@ package com.google.api.explorer.client.embedded;
 import com.google.api.explorer.client.AnalyticsManager;
 import com.google.api.explorer.client.AppState;
 import com.google.api.explorer.client.AuthManager;
-import com.google.api.explorer.client.ExplorerEntryPoint;
+import com.google.api.explorer.client.ExplorerConfig;
 import com.google.api.explorer.client.HistoryManager;
 import com.google.api.explorer.client.Resources;
 import com.google.api.explorer.client.ServiceLoader;
@@ -99,10 +99,15 @@ public class EmbeddedEntryPoint implements EntryPoint {
       Auth.get().setOAuthWindowUrl(authPopup);
     }
 
+    // Set the base URL if one is given in the embedding div.
+    String base = rootElement.getAttribute(BASE_ATTR);
+    if (base != null && !base.isEmpty()) {
+      Config.setBaseUrl(base);
+    }
 
     // Set the API key and application name to use for calls from the Explorer.
-    Config.setApiKey(ExplorerEntryPoint.API_KEY);
-    Config.setApplicationName(ExplorerEntryPoint.APP_NAME + " (embedded)");
+    Config.setApiKey(ExplorerConfig.API_KEY);
+    Config.setApplicationName(ExplorerConfig.APP_NAME + " (embedded)");
 
     // Dependencies for the UI
     eventBus = new SimpleEventBus();

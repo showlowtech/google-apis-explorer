@@ -40,4 +40,11 @@ public class ExplorerConfig {
    */
   public static final Set<String> PUBLIC_ONLY_APIS = ImmutableSet.of("discovery");
 
+  /** API key assigned to the API Explorer to be used when making requests. */
+  public static final String API_KEY = "AIzaSyBrBMkC4y1E3YSNU8veQ5oo1tZ5ijYAiaE";
+
+  /** The name of this application. */
+  public static final String APP_NAME = "Google APIs Explorer";
+
+  
 }

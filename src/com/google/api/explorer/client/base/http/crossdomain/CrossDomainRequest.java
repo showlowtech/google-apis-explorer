@@ -18,6 +18,7 @@ package com.google.api.explorer.client.base.http.crossdomain;
 
 import com.google.api.explorer.client.base.ApiRequest;
 import com.google.api.explorer.client.base.ApiResponse;
+import com.google.api.explorer.client.base.Config;
 import com.google.api.explorer.client.base.dynamicjso.DynamicJso;
 import com.google.api.explorer.client.base.http.HttpException;
 import com.google.api.explorer.client.base.http.TimeoutException;
@@ -88,10 +89,18 @@ public final class CrossDomainRequest {
       headers.set(entry.getKey(), entry.getValue());
     }
 
+    // If the base URL contains a path segment, prepend that to the request URL
+    // (the JS client ignores the path)
+    // TODO(jasonhall): When the JS client fixes this bug, use a version with
+    // the fix and don't handle it ourselves.
+    String baseUrl = Config.getBaseUrl();
+    int pathStart = baseUrl.indexOf('/', "https://".length());
+    String path = pathStart == -1 ? "" : baseUrl.substring(pathStart);
+
     return DynamicJso
         .createObject()
         .<DynamicJso>cast()
-        .set("url", request.getRequestPath())
+        .set("url", path + request.getRequestPath())
         .set("headers", headers)
         .set("body", request.body)
         .set("httpMethod", request.httpMethod.name());

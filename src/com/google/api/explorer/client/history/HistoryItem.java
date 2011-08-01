@@ -16,6 +16,7 @@
 
 package com.google.api.explorer.client.history;
 
+import com.google.api.explorer.client.ExplorerConfig;
 import com.google.api.explorer.client.Resources;
 import com.google.api.explorer.client.base.ApiRequest;
 import com.google.api.explorer.client.base.ApiResponse;
@@ -101,10 +102,11 @@ public class HistoryItem extends Composite {
         .append(request.httpMethod.name())
         .append(' ')
         .append(Config.getBaseUrl())
+        // If the standard API key is being used, mask it in the UI.
         // The URL is already URL-escaped before making the request, so we don't
         // want to double-escape it.
-        .append(
-            request.getRequestPath().replace("key=" + Config.getApiKey(), "key={YOUR_API_KEY}"));
+        .append(request.getRequestPath().replace("key=" + ExplorerConfig.API_KEY,
+            "key={YOUR_API_KEY}"));
 
     // Display headers that were set on the request.
     // TODO(jasonhall): This can be prettier.

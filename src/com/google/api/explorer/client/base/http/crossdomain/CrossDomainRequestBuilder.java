@@ -63,6 +63,7 @@ public class CrossDomainRequestBuilder {
         @Override
         public void run() {
           if (scriptLoaded()) {
+            setBaseUrl();
             doMakeRequest(request, xdr);
             cancel();
           }
@@ -79,4 +80,14 @@ public class CrossDomainRequestBuilder {
     xdr.sendRequest(jso);
   }
 
+  private static native void setBaseUrl() /*-{
+    var proxy = @com.google.api.explorer.client.base.Config::baseUrl + '/static/proxy.html';
+    $wnd['__GOOGLEAPIS'] = {
+      'googleapis.config': {
+        'proxy': proxy,
+        'gcv':
+            @com.google.api.explorer.client.base.http.crossdomain.CrossDomainRequestBuilder::JS_CLIENT_NAME
+      }
+    };
+  }-*/;
 }

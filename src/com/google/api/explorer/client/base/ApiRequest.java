@@ -214,8 +214,16 @@ public class ApiRequest {
     // and the method's path.
     String pathUrl = method.getPath();
     Set<String> unusedParamKeys = new HashSet<String>(paramValues.keySet());
+    
+    String basePath = service.getBasePath();
+    if (basePath.startsWith(Config.getBaseUrl())) {
+      // If the basePath starts with the baseURL as configured, remove it.
+      // TODO(jasonhall): Have some longer-term solution in which the basePath
+      // won't be a full URL, and handle this accordingly.
+      basePath = basePath.substring(Config.getBaseUrl().length());
+    }
 
-    StringBuilder sb = new StringBuilder(service.getBasePath());
+    StringBuilder sb = new StringBuilder(basePath);
 
     boolean addSlash = false;
     for (String section : pathUrl.split("/")) {
@@ -261,5 +269,4 @@ public class ApiRequest {
       innerRequest.cancel();
     }
   }
-
 }
