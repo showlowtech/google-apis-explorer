@@ -54,6 +54,10 @@ public abstract class Config {
     return userAgent;
   }
 
+  /** Set the base URL to use when making requests. */
+  public static void setBaseUrl(String baseUrl) {
+    Config.baseUrl = baseUrl;
+  }
 
   /**
    * Returns the base URL to use when making requests.

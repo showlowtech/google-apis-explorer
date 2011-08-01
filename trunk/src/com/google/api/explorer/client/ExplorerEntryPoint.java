@@ -27,6 +27,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 /**
@@ -36,21 +37,27 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
  */
 public class ExplorerEntryPoint implements EntryPoint {
 
-  /** API key assigned to the API Explorer to be used when making requests. */
-  public static final String API_KEY = "AIzaSyBrBMkC4y1E3YSNU8veQ5oo1tZ5ijYAiaE";
-
-  /** The name of this application. */
-  public static final String APP_NAME = "Google APIs Explorer";
-
   @Override
   public void onModuleLoad() {
     // Make sure that CSS gets applied.
     Resources.INSTANCE.style().ensureInjected();
 
-
     // Set the API key and application name to use for calls from the Explorer.
-    Config.setApiKey(API_KEY);
-    Config.setApplicationName(APP_NAME);
+    Config.setApiKey(ExplorerConfig.API_KEY);
+    Config.setApplicationName(ExplorerConfig.APP_NAME);
+
+    // If the URL specifies a base URL, use it.
+    // If it specifies an API key, use it as well. If no key is specified (and
+    // the base URL is), then unset the key -- use no API key. We only want to
+    // use the specified key when the base URL is also set -- for requests to
+    // the default backend (googleapis.com, defined in Config.java) we always
+    // want to use the standard API key.
+    String baseUrl = Window.Location.getParameter("base");
+    String key = Window.Location.getParameter("key");
+    if (baseUrl != null) {
+      Config.setBaseUrl(baseUrl);
+      Config.setApiKey(key == null ? "" : key);
+    }
 
     // Dependencies for the UI
     final EventBus eventBus = new SimpleEventBus();

@@ -51,12 +51,12 @@ public class ApiServiceFactory {
   public void create(
       final String serviceName, final String version, final AsyncCallback<ApiService> callback) {
     ApiRequest request = new ApiRequest(createDiscoveryPath(serviceName, version));
-
+    
     // If a Discovery Auth token is set, use it.
     if (Config.getDiscoveryAuthToken() != null) {
       request.headers.put("Authorization", "OAuth " + Config.getDiscoveryAuthToken());
     }
-
+    
     request.send(new AsyncCallback<ApiResponse>() {
       @Override
       public void onSuccess(ApiResponse response) {
