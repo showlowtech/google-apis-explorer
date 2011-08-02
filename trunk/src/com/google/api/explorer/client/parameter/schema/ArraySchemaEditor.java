@@ -94,7 +94,7 @@ class ArraySchemaEditor extends Composite implements SchemaEditor {
   public JSONValue getJSONValue() {
     JSONArray arr = new JSONArray();
     for (int i = 0; i < editors.size(); i++) {
-      arr.set(0, editors.get(i).getJSONValue());
+      arr.set(i, editors.get(i).getJSONValue());
     }
     return arr;
   }
