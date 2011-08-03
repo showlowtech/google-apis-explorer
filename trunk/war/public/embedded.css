@@ -15,3 +15,21 @@
 .bodyDisclosure {
   padding-top: 14px;
 }
+
+@external .gwt-SuggestBoxPopup, .item, .item-selected;
+
+.gwt-SuggestBoxPopup {
+  border: 1px solid #B8B8B8;
+}
+
+.gwt-SuggestBoxPopup td.item {
+  max-width: 700px;
+  white-space: normal !important;
+  height: 25px;
+  padding: 5px;
+}
+
+.gwt-SuggestBoxPopup .item-selected {
+  background-color: #EEEEEE; !important;
+}
+
