@@ -17,6 +17,7 @@
 package com.google.api.explorer.client.editors;
 
 import com.google.api.explorer.client.Resources;
+import com.google.api.explorer.client.editors.Validator.ValidationResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -41,8 +42,13 @@ class RepeatedEditor extends Editor {
   }
 
   @Override
-  boolean isValid() {
-    return super.isValid() && innerEditor.isValid();
+  ValidationResult isValid() {
+    ValidationResult innerValid = innerEditor.isValid();
+    if (innerValid.getType() != ValidationResult.Type.VALID) {
+      return innerValid;
+    } else {
+      return super.isValid();
+    }
   }
 
   @Override
@@ -145,11 +151,17 @@ class RepeatedEditor extends Editor {
     }
 
     @Override
-    public void displayValidation(boolean valid) {
-      if (valid) {
-        removeStyleName(Resources.INSTANCE.style().invalidParameter());
-      } else {
-        addStyleName(Resources.INSTANCE.style().invalidParameter());
+    public void displayValidation(ValidationResult valid) {
+      switch(valid.getType()) {
+        case VALID:
+          setStyleName("");
+          break;
+        case INFO:
+          setStyleName(Resources.INSTANCE.style().infoParameter());
+          break;
+        case ERROR:
+          setStyleName(Resources.INSTANCE.style().invalidParameter());
+          break;
       }
     }
   }

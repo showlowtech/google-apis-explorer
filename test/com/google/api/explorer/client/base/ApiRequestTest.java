@@ -16,7 +16,10 @@
 
 package com.google.api.explorer.client.base;
 
+import com.google.api.explorer.client.TestUrlEncoder;
+import com.google.api.explorer.client.UrlEncoder;
 import com.google.api.explorer.client.base.ApiMethod.HttpMethod;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import junit.framework.TestCase;
@@ -35,13 +38,18 @@ public class ApiRequestTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
     Config.setApiKey("");
+    ApiRequest.urlEncoder = new TestUrlEncoder();
+  }
+
+  @Override
+  protected void tearDown() {
+    ApiRequest.urlEncoder = UrlEncoder.DEFAULT;
   }
 
   /** When an API key is set, it is added as a parameter value. */
   public void testApiKey() {
     ApiMethod method = EasyMock.createControl().createMock(ApiMethod.class);
     EasyMock.expect(method.getHttpMethod()).andReturn(HttpMethod.GET);
-    EasyMock.expect(method.getParameters()).andReturn(null);
 
     ApiService service = EasyMock.createControl().createMock(ApiService.class);
     EasyMock.expect(service.method("method")).andReturn(method);
@@ -53,7 +61,7 @@ public class ApiRequestTest extends TestCase {
     Config.setApiKey("MY_API_KEY");
     request.maybeSetApiKeyParameter();
     assertEquals(Lists.newArrayList("MY_API_KEY"), request.paramValues.get("key"));
-    EasyMock.verify();
+    EasyMock.verify(method, service);
   }
 
   /**
@@ -106,11 +114,11 @@ public class ApiRequestTest extends TestCase {
   public void testGetRequestPath() {
     ApiMethod method = EasyMock.createControl().createMock(ApiMethod.class);
     EasyMock.expect(method.getHttpMethod()).andReturn(HttpMethod.GET);
-    EasyMock.expect(method.getPath()).andReturn("/path/to/{pathParam}").times(2);
+    EasyMock.expect(method.getPath()).andReturn("/path/to/{pathParam}").times(4);
 
     ApiService service = EasyMock.createControl().createMock(ApiService.class);
     EasyMock.expect(service.method("method")).andReturn(method);
-    EasyMock.expect(service.getBasePath()).andReturn("/base").times(2);
+    EasyMock.expect(service.getBasePath()).andReturn("/base").times(4);
 
     EasyMock.replay(method, service);
 
@@ -124,7 +132,11 @@ public class ApiRequestTest extends TestCase {
     request.paramValues.put("pathParam", "1234");
     assertEquals("/base/path/to/1234", request.getRequestPath());
 
-    // TODO(jasonhall): Test adding a query parameter.
+    request.paramValues.replaceValues("pathParam", ImmutableList.of("12/34"));
+    assertEquals("/base/path/to/12%2F34", request.getRequestPath());
+
+    request.paramValues.put("nonPathParam", "abc/de");
+    assertEquals("/base/path/to/12%2F34?nonPathParam=abc%2Fde", request.getRequestPath());
 
     EasyMock.verify(method, service);
   }

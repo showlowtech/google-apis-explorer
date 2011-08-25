@@ -91,6 +91,8 @@ public interface Resources extends ClientBundle {
 
     String invalidParameter();
 
+    String infoParameter();
+
     String jsonNull();
 
     String jsonNumber();

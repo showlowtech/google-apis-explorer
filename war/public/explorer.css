@@ -140,6 +140,15 @@ a.jsonStringLink {
   padding-top: 3px;
 }
 
+.infoParameter input {
+  border: 2px solid #f0c36d !important;
+}
+
+.infoParameter div {
+  color: #666;
+  padding-top: 3px;
+}
+
 .clickable {
   color: #4272DB;
   text-decoration: underline;
