@@ -17,6 +17,7 @@
 package com.google.api.explorer.client.editors;
 
 import com.google.api.explorer.client.Resources;
+import com.google.api.explorer.client.editors.Validator.ValidationResult;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gwt.event.dom.client.FocusEvent;
@@ -62,13 +63,13 @@ public class EnumEditor extends Editor {
    */
   public class EnumValidator implements Validator {
     @Override
-    public boolean isValid(List<String> values) {
+    public ValidationResult isValid(List<String> values) {
       for (String value : values) {
         if (!value.isEmpty() && !enumValues.contains(value)) {
-          return false;
+          return SimpleValidationResult.createError("Must be one of the specified values.");
         }
       }
-      return true;
+      return SimpleValidationResult.STATUS_VALID;
     }
   }
 
@@ -146,13 +147,23 @@ public class EnumEditor extends Editor {
     }
 
     @Override
-    public void displayValidation(boolean valid) {
-      if (valid) {
-        removeStyleName(Resources.INSTANCE.style().invalidParameter());
-      } else {
-        addStyleName(Resources.INSTANCE.style().invalidParameter());
+    public void displayValidation(ValidationResult valid) {
+      switch(valid.getType()) {
+        case VALID:
+          setStyleName("");
+          errorMessage.setVisible(false);
+          break;
+        case INFO:
+          setStyleName(Resources.INSTANCE.style().infoParameter());
+          errorMessage.setVisible(true);
+          errorMessage.setText(valid.getMessage());
+          break;
+        case ERROR:
+          setStyleName(Resources.INSTANCE.style().invalidParameter());
+          errorMessage.setVisible(true);
+          errorMessage.setText(valid.getMessage());
+          break;
       }
-      errorMessage.setVisible(!valid);
     }
   }
 }

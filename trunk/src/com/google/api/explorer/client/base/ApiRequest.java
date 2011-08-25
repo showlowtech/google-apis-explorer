@@ -16,6 +16,7 @@
 
 package com.google.api.explorer.client.base;
 
+import com.google.api.explorer.client.UrlEncoder;
 import com.google.api.explorer.client.base.ApiMethod.HttpMethod;
 import com.google.api.explorer.client.base.http.TimeoutException;
 import com.google.api.explorer.client.base.http.crossdomain.CrossDomainRequest;
@@ -27,7 +28,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import java.util.HashSet;
@@ -84,6 +84,9 @@ public class ApiRequest {
 
   /** Key-value mapping of headers to set in this request. */
   public final Map<String, String> headers = Maps.newHashMap();
+
+  @VisibleForTesting
+  static UrlEncoder urlEncoder = UrlEncoder.DEFAULT;
 
   /** HTTP Body sent by this request, or {@code null} if no body is set. */
   public String body;
@@ -214,7 +217,7 @@ public class ApiRequest {
     // and the method's path.
     String pathUrl = method.getPath();
     Set<String> unusedParamKeys = new HashSet<String>(paramValues.keySet());
-    
+
     String basePath = service.getBasePath();
     if (basePath.startsWith(Config.getBaseUrl())) {
       // If the basePath starts with the baseURL as configured, remove it.
@@ -238,7 +241,7 @@ public class ApiRequest {
         if (paramValues.containsKey(paramKey)) {
           // TODO(jasonhall): Investigate how to support repeated path
           // parameters, or throw an error here if it's not supported.
-          sb.append(paramValues.get(paramKey).get(0));
+          sb.append(urlEncoder.encodePathSegment(paramValues.get(paramKey).get(0)));
         }
         unusedParamKeys.remove(paramKey);
       } else {
@@ -251,9 +254,9 @@ public class ApiRequest {
       for (String value : paramValues.get(key)) {
         sb
             .append(delim)
-            .append(URL.encodePathSegment(key))
+            .append(urlEncoder.encodeQueryString(key))
             .append("=")
-            .append(URL.encodePathSegment(value));
+            .append(urlEncoder.encodeQueryString(value));
         delim = "&";
       }
     }
