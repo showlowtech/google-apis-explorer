@@ -52,6 +52,7 @@
       cursor: pointer;
       font-size: 9px;
       padding-left: 20px;
+      font-family: arial, sans-serif;
     }
 
     .error {

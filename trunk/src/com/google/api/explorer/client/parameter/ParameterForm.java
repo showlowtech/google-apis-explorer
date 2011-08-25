@@ -163,6 +163,9 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
     requiredDescription.setVisible(false);
     bodyDisclosure.setText(ADD_REQ_BODY);
 
+    // Don't show the "Add request body" link if the method is a GET.
+    bodyDisclosure.setVisible(method.getHttpMethod() != HttpMethod.GET);
+
     // Reset the table.
     table.clear(true);
     while (table.getRowCount() > 0) {
