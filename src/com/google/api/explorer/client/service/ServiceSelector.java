@@ -17,7 +17,6 @@
 package com.google.api.explorer.client.service;
 
 import com.google.api.explorer.client.ApiDirectory.ServiceDefinition;
-import com.google.api.explorer.client.ExplorerConfig;
 import com.google.api.explorer.client.selector.Selector;
 import com.google.api.explorer.client.selector.SelectorItem;
 import com.google.common.collect.Lists;
@@ -59,7 +58,7 @@ public class ServiceSelector extends Composite implements ServiceSelectorPresent
   public void setServices(Set<ServiceDefinition> services) {
     List<SelectorItem> items = Lists.newArrayList();
     for (ServiceDefinition def : services) {
-      if (def.isPreferred() && !ExplorerConfig.SERVICE_BLACKLIST.contains(def.getName())) {
+      if (def.isPreferred()) {
         String icon16Url = def.getIcons() != null ? def.getIcons().getIcon16Url() : null;
         items.add(new SelectorItem(def.getName(), icon16Url, def.getDescription()));
       }
