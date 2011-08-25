@@ -40,7 +40,8 @@
     }
 
     .wireTraffic pre {
-      margin: 0;
+      margin: 0px;
+      margin-left: 15px;
     }
 
     .body {
@@ -79,7 +80,7 @@
       <h3>Request</h3>
       <div class="{style.wireTraffic}">
         <pre ui:field="requestDiv" />
-        <pre ui:field="requestBodyDiv"/>
+        <pre><g:FlowPanel ui:field="requestBodyDiv"/></pre>
       </div>
 
       <h3>Response</h3>
@@ -89,7 +90,7 @@
           - Show headers -
         </g:Label>
         <pre ui:field="responseHeadersDiv" />
-        <pre ui:field="responseBodyDiv" />
+        <pre><g:FlowPanel ui:field="responseBodyDiv" /></pre>
       </div>
     </div>
   </g:HTMLPanel>

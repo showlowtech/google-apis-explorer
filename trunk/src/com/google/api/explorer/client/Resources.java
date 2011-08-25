@@ -109,8 +109,12 @@ public interface Resources extends ClientBundle {
 
     String jsonArray();
 
+    String jsonExpanded();
+
+    String jsonCollapsed();
+
     String responseLine();
-    
+
     String clickable();
   }
 }
