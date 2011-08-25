@@ -28,13 +28,6 @@ import java.util.Set;
 public class ExplorerConfig {
 
   /**
-   * Services which should explicitly not appear in the Explorer for one reason
-   * or another.
-   */
-  public static final Set<String> SERVICE_BLACKLIST =
-      ImmutableSet.of("latitude");
-
-  /**
    * APIs which do not require a key to access, and so will fail if one is
    * given.
    */
