@@ -91,19 +91,21 @@ a.jsonStringLink {
 }
 
 @sprite .jsonExpanded {
-  gwt-image: 'collapse';
+  gwt-image: 'collapseJson';
   background: transparent collapsedUrl no-repeat;
-  background-position: 2px 2px;
-  padding-left: 15px;
-  margin-left: -15px;
+  background-position: 2px 4px;
+  padding-left: 11px;
+  margin-left: -11px;
+  cursor: pointer;
 }
 
 @sprite .jsonCollapsed {
-  gwt-image: 'expand';
+  gwt-image: 'expandJson';
   background: transparent collapsedUrl no-repeat;
-  background-position: 2px 2px;
-  padding-left: 15px;
-  margin-left: -15px;
+  background-position: 2px 4px;
+  padding-left: 11px;
+  margin-left: -11px;
+  cursor: pointer;
 }
 
 .responseLine {

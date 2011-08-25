@@ -39,6 +39,12 @@ public interface Resources extends ClientBundle {
   @Source(PATH + "minus-box.gif")
   ImageResource collapse();
 
+  @Source(PATH + "expand-json.png")
+  ImageResource expandJson();
+
+  @Source(PATH + "collapse-json.png")
+  ImageResource collapseJson();
+
   @Source(PATH + "loading.gif")
   ImageResource loading();
 
