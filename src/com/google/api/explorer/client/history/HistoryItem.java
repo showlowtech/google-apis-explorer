@@ -35,7 +35,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -59,7 +59,7 @@ public class HistoryItem extends Composite {
   @UiField public PreElement requestDiv;
   @UiField public PreElement requestBodyDiv;
   @UiField public PreElement statusDiv;
-  @UiField public InlineLabel showHideHeaders;
+  @UiField public Label showHideHeaders;
   @UiField public PreElement responseHeadersDiv;
   @UiField public PreElement responseBodyDiv;
 

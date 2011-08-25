@@ -19,7 +19,8 @@ package com.google.api.explorer.client.editors;
 import com.google.api.explorer.client.Resources;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 import java.util.List;
@@ -39,13 +40,17 @@ class BasicEditor extends Editor {
     return viewImpl;
   }
 
-  public static class BasicViewImpl extends SimplePanel implements EditorView {
+  public static class BasicViewImpl extends FlowPanel implements EditorView {
 
     private TextBox textBox;
+    private Label errorMessage;
 
     public BasicViewImpl() {
       this.textBox = new TextBox();
+      this.errorMessage = new Label("This parameter is invalid.");
+      errorMessage.setVisible(false);
       add(textBox);
+      add(errorMessage);
     }
 
     @Override
@@ -65,7 +70,8 @@ class BasicEditor extends Editor {
 
     @Override
     public void displayValidation(boolean valid) {
-      textBox.setStyleName(valid ? "" : Resources.INSTANCE.style().invalidParameter());
+      setStyleName(valid ? "" : Resources.INSTANCE.style().invalidParameter());
+      errorMessage.setVisible(!valid);
     }
   }
 }

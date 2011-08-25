@@ -115,8 +115,13 @@ a.jsonStringLink {
   padding-right: 5px;
 }
 
-.invalidParameter {
-  background-color: #ffb2b2;
+.invalidParameter input {
+  border: 2px solid #DD4B39 !important;
+}
+
+.invalidParameter div {
+  color: #DD4B39;
+  padding-top: 3px;
 }
 
 .clickable {
