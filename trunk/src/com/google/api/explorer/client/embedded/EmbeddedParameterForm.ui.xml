@@ -203,6 +203,6 @@
     </g:Label>
     <g:Button styleName="{style.execute}" ui:field="submit">Execute</g:Button>
     <img class="{style.executing}" ui:field="executing" />
-    <g:InlineLabel ui:field="requiredDescription">Required fields are bolded</g:InlineLabel>
+    <g:InlineLabel ui:field="requiredDescription">Required fields are in bold</g:InlineLabel>
   </g:HTMLPanel>
 </ui:UiBinder>
