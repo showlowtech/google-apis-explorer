@@ -16,7 +16,11 @@
 
 package com.google.api.explorer.client;
 
+import com.google.common.base.Join;
+import com.google.common.collect.Lists;
 import com.google.gwt.http.client.URL;
+
+import java.util.List;
 
 /**
  * Simple URL encoding interface that allows the URL encoding to be pluggable (for testing).
@@ -49,9 +53,25 @@ public interface UrlEncoder {
    * Default implementation that delegates to the GWT URL encoder.
    */
   static final UrlEncoder DEFAULT = new UrlEncoder() {
+    // TODO(user) Nasty hack ahoy! remove the exception for buzz and the
+    // splitting, joining stuff that happens below when Buzz can accept a
+    // percent encoded "@" or we no longer need to support Buzz.
+
+    // Special charater that Buzz requires to not be encoded
+    private static final String SPECIAL_DELIMITER = "@";
+
+    /**
+     * For Buzz, we have to take special care not to encode the "@" sign
+     */
     @Override
     public String encodePathSegment(String decodedURLComponent) {
-      return URL.encodePathSegment(decodedURLComponent);
+      // Take special precautions to avoid encoding the special Buzz delimiter
+      String[] segments = decodedURLComponent.split(SPECIAL_DELIMITER);
+      List<String> result = Lists.newArrayListWithCapacity(segments.length);
+      for (String segment : segments) {
+        result.add(URL.encodePathSegment(segment));
+      }
+      return Join.join(SPECIAL_DELIMITER, result);
     }
 
     @Override
