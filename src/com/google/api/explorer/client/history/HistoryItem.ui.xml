@@ -61,7 +61,7 @@
       <g:SimplePanel ui:field="errorPanel" styleName="{res.style.error}" visible="false" />
       <h3>Request</h3>
       <pre ui:field="requestDiv" />
-      <pre ui:field="requestBodyDiv" class="{style.response}"/>
+      <pre><g:FlowPanel ui:field="requestBodyDiv" styleName="{style.response}"/></pre>
 
       <h3>Response</h3>
       <pre ui:field="statusDiv" />
@@ -69,7 +69,7 @@
         - Show headers -
       </g:Label>
       <pre ui:field="responseHeadersDiv" />
-      <pre ui:field="responseBodyDiv" class="{style.response}" />
+      <pre><g:FlowPanel ui:field="responseBodyDiv" styleName="{style.response}" /></pre>
     </div>
   </g:HTMLPanel>
 </ui:UiBinder>

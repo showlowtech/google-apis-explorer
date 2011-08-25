@@ -24,6 +24,7 @@ import com.google.api.explorer.client.auth.AuthPresenterTest;
 import com.google.api.explorer.client.base.ApiRequestTest;
 import com.google.api.explorer.client.base.ApiServiceTest;
 import com.google.api.explorer.client.editors.EditorFactoryTest;
+import com.google.api.explorer.client.history.JsonPrettifierTest;
 import com.google.api.explorer.client.method.MethodSelectorPresenterTest;
 import com.google.api.explorer.client.parameter.ParameterFormPresenterTest;
 import com.google.api.explorer.client.service.ServiceSelectorPresenterTest;
@@ -46,6 +47,7 @@ public class JUnitTests extends TestSuite {
     suite.addTestSuite(AuthPresenterTest.class);
     suite.addTestSuite(EditorFactoryTest.class);
     suite.addTestSuite(HistoryManagerTest.class);
+    suite.addTestSuite(JsonPrettifierTest.class);
     suite.addTestSuite(MethodSelectorPresenterTest.class);
     suite.addTestSuite(ParameterFormPresenterTest.class);
     suite.addTestSuite(ServiceLoaderTest.class);

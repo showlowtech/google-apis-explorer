@@ -34,6 +34,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -57,11 +58,11 @@ public class HistoryItem extends Composite {
   @UiField public DivElement collapseDiv;
   @UiField public SimplePanel errorPanel;
   @UiField public PreElement requestDiv;
-  @UiField public PreElement requestBodyDiv;
+  @UiField public FlowPanel requestBodyDiv;
   @UiField public PreElement statusDiv;
   @UiField public Label showHideHeaders;
   @UiField public PreElement responseHeadersDiv;
-  @UiField public PreElement responseBodyDiv;
+  @UiField public FlowPanel responseBodyDiv;
 
   protected HistoryItem(String methodIdentifier, long timeMillis, ApiRequest request,
       ApiResponse response) {
@@ -82,10 +83,10 @@ public class HistoryItem extends Composite {
     // Headers are hidden by default.
     UIObject.setVisible(responseHeadersDiv, false);
     responseHeadersDiv.setInnerText(getResponseHeadersString(response));
-    JsonPrettifier.syntaxHighlight(responseBodyDiv, response.body);
-    JsonPrettifier.syntaxHighlight(requestBodyDiv, request.body);
+    JsonPrettifier.prettify(requestBodyDiv, request.body);
+    JsonPrettifier.prettify(responseBodyDiv, response.body);
   }
-  
+
   protected void initWidget() {
     initWidget(uiBinder.createAndBindUi(this));
   }

@@ -17,6 +17,7 @@
 package com.google.api.explorer.client.history;
 
 import com.google.api.explorer.client.AppState;
+import com.google.api.explorer.client.Resources;
 import com.google.api.explorer.client.base.ApiRequest;
 import com.google.api.explorer.client.base.ApiResponse;
 import com.google.gwt.core.client.GWT;
@@ -55,6 +56,7 @@ public class HistoryPanel extends Composite implements HistoryPanelPresenter.Dis
     initWidget(uiBinder.createAndBindUi(this));
     new HistoryPanelPresenter(eventBus, appState, this);
     JsonPrettifier.appState = appState;
+    JsonPrettifier.style = Resources.INSTANCE.style();
   }
 
   @Override

@@ -90,6 +90,22 @@ a.jsonStringLink {
   /* Reserved for future use. */
 }
 
+@sprite .jsonExpanded {
+  gwt-image: 'collapse';
+  background: transparent collapsedUrl no-repeat;
+  background-position: 2px 2px;
+  padding-left: 15px;
+  margin-left: -15px;
+}
+
+@sprite .jsonCollapsed {
+  gwt-image: 'expand';
+  background: transparent collapsedUrl no-repeat;
+  background-position: 2px 2px;
+  padding-left: 15px;
+  margin-left: -15px;
+}
+
 .responseLine {
   /* Reserved for future use. */
 }

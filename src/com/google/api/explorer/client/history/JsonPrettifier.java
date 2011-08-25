@@ -17,7 +17,6 @@
 package com.google.api.explorer.client.history;
 
 import com.google.api.explorer.client.AppState;
-import com.google.api.explorer.client.Resources;
 import com.google.api.explorer.client.Resources.Css;
 import com.google.api.explorer.client.base.ApiMethod;
 import com.google.api.explorer.client.base.ApiMethod.HttpMethod;
@@ -28,99 +27,356 @@ import com.google.api.explorer.client.base.dynamicjso.JsType;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.JsonUtils;
-import com.google.gwt.dom.client.AnchorElement;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.InlineHyperlink;
+import com.google.gwt.user.client.ui.InlineLabel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 
 /**
  * A simple syntax highlighter for JSON data.
  *
- * @author jasonhall@google.com (Jason Hall)
  */
-// TODO(jasonhall): Add collapsible sections for objects and arrays.
 public class JsonPrettifier {
-
-  // Indent one space per indentation level (matches real response)
-  private static final int INDENT_BY = 1;
-  private static final Document DOCUMENT = Document.get();
-  private static final Css STYLE = Resources.INSTANCE.style();
+  private static final String PLACEHOLDER_TEXT = "...";
+  private static final String SEPARATOR_TEXT = ",";
+  private static final String OPEN_IN_NEW_WINDOW = "_blank";
 
   public static AppState appState;
+  public static Css style;
 
-  // Current indentation level.
-  private static int indent = 0;
+  private static class Collapser implements ClickHandler {
+    private final Widget toHide;
+    private final Widget placeHolder;
+    private final Widget clicker;
+
+    public Collapser(Widget toHide, Widget placeHolder, Widget clicker) {
+      this.toHide = toHide;
+      this.placeHolder = placeHolder;
+      this.clicker = clicker;
+    }
+
+    @Override
+    public void onClick(ClickEvent arg0) {
+      boolean makeVisible = !toHide.isVisible();
+      decorateCollapserControl(clicker, makeVisible);
+      toHide.setVisible(makeVisible);
+      placeHolder.setVisible(!makeVisible);
+    }
+
+    public static void decorateCollapserControl(Widget collapser, boolean visible) {
+      if (visible) {
+        collapser.addStyleName(style.jsonExpanded());
+        collapser.removeStyleName(style.jsonCollapsed());
+      } else {
+        collapser.addStyleName(style.jsonCollapsed());
+        collapser.removeStyleName(style.jsonExpanded());
+      }
+    }
+  }
 
   /**
-   * Appends a syntax-highlighted DOM structure based on the JSON string to the
-   * parent element. If any error is encountered, such as the string not being
-   * valid JSON, or anything else, the text will simply be added to the parent
-   * element unhighlighted.
+   * This abstraction of an array creates formatted widgets from all children.
    */
-  public static void syntaxHighlight(Element parent, String jsonString) {
-    // Reset indentation (just in case)
-    indent = 0;
+  private static class JsArrayIterable implements Iterable<Widget> {
+    private final DynamicJsArray backingObj;
+    private final int depth;
 
+    public JsArrayIterable(DynamicJsArray array, int depth) {
+      this.backingObj = array;
+      this.depth = depth;
+    }
+
+    @Override
+    public Iterator<Widget> iterator() {
+      return new Iterator<Widget>() {
+        private int nextOffset = 0;
+
+        @Override
+        public boolean hasNext() {
+          return nextOffset < backingObj.length();
+        }
+
+        @Override
+        public Widget next() {
+          if (!hasNext()) {
+            throw new NoSuchElementException();
+          }
+          Widget next = formatArrayValue(
+              backingObj, nextOffset, depth, nextOffset + 1 < backingObj.length());
+          nextOffset++;
+          return next;
+        }
+
+        @Override
+        public void remove() {
+          throw new UnsupportedOperationException();
+        }
+      };
+    }
+  }
+
+  /**
+   * This abstraction of an object creates formatted widgets from all children.
+   */
+  private static class JsObjectIterable implements Iterable<Widget> {
+    private final DynamicJso backingObj;
+    private final int depth;
+
+    public JsObjectIterable(DynamicJso obj, int depth) {
+      this.backingObj = obj;
+      this.depth = depth;
+    }
+
+    @Override
+    public Iterator<Widget> iterator() {
+      return new Iterator<Widget>() {
+         int nextOffset = 0;
+
+        @Override
+        public boolean hasNext() {
+          return nextOffset < backingObj.keys().length();
+        }
+
+        @Override
+        public Widget next() {
+          if (!hasNext()) {
+            throw new NoSuchElementException();
+          }
+          Widget next =
+              formatValue(backingObj, backingObj.keys().get(nextOffset), depth,
+                  nextOffset + 1 < backingObj.keys().length());
+          nextOffset++;
+          return next;
+        }
+
+        @Override
+        public void remove() {
+          throw new UnsupportedOperationException();
+        }
+      };
+    }
+  }
+
+  /**
+   * Entry point for the formatter.
+   *
+   * @param destination Destination GWT object where the results will be placed
+   * @param jsonString String to format
+   */
+  public static void prettify(Panel destination, String jsonString) {
     // Don't bother syntax highlighting empty text.
     boolean empty = Strings.isNullOrEmpty(jsonString);
-    UIObject.setVisible(parent, !empty);
+    destination.setVisible(!empty);
     if (empty) {
       return;
     }
-    
+
     if (!GWT.isScript()) {
       // Syntax highlighting is *very* slow in Development Mode (~30s for large
       // responses), but very fast when compiled and run as JS (~30ms). For the
-      // sake of my sanity, syntax highlighting is disabled in Development Mode.
-      parent.setInnerText(jsonString);
+      // sake of my sanity, syntax highlighting is disabled in Development
+      destination.add(new InlineLabel(jsonString));
     } else {
 
       try {
-        parent.appendChild(objectToElement(JsonUtils.<DynamicJso>safeEval(jsonString)));
+        DynamicJso root = JsonUtils.<DynamicJso>safeEval(jsonString);
+        destination.add(formatGroup(new JsObjectIterable(root, 1), "", 0, "{", "}", false));
       } catch (Exception e) {
         // As a fallback in case anything goes wrong, just set the inner text
         // without any highlighting.
-        parent.setInnerText(jsonString);
+        destination.add(new InlineLabel(jsonString));
       }
     }
   }
 
-  private static SpanElement wrapInSpan(String value) {
-    return wrapInSpan(value, "");
-  }
+  /**
+   * Iterate through an object or array adding the widgets generated for all children
+   */
+  private static FlowPanel formatGroup(Iterable<Widget> objIterable,
+      String title,
+      int depth,
+      String openGroup,
+      String closeGroup,
+      boolean hasSeparator) {
 
-  private static SpanElement wrapInSpan(String value, String className) {
-    SpanElement span = DOCUMENT.createSpanElement();
-    if (!className.isEmpty()) {
-      span.setClassName(className);
+    FlowPanel object = new FlowPanel();
+
+    FlowPanel titlePanel = new FlowPanel();
+    Label paddingSpaces = new InlineLabel(indentation(depth));
+    titlePanel.add(paddingSpaces);
+
+    Label titleLabel = new InlineLabel(title + openGroup);
+    titleLabel.addStyleName(style.jsonKey());
+    Collapser.decorateCollapserControl(titleLabel, true);
+    titlePanel.add(titleLabel);
+
+    object.add(titlePanel);
+
+    FlowPanel objectContents = new FlowPanel();
+    for (Widget child : objIterable) {
+      objectContents.add(child);
     }
-    span.setInnerText(value);
-    return span;
+    object.add(objectContents);
+
+    InlineLabel placeholder = new InlineLabel(indentation(depth + 1) + PLACEHOLDER_TEXT);
+    ClickHandler collapsingHandler = new Collapser(objectContents, placeholder, titleLabel);
+    placeholder.setVisible(false);
+    placeholder.addClickHandler(collapsingHandler);
+    object.add(placeholder);
+
+    titleLabel.addClickHandler(collapsingHandler);
+
+    StringBuilder closingLabelText = new StringBuilder(indentation(depth)).append(closeGroup);
+    if (hasSeparator) {
+      closingLabelText.append(SEPARATOR_TEXT);
+    }
+
+    object.add(new Label(closingLabelText.toString()));
+
+    return object;
   }
 
-  private static AnchorElement wrapInAnchor(String url) {
-    Map.Entry<String, ApiMethod> entry = getMethodForUrl(url);
-    if (entry != null) {
+  private static Widget formatArrayValue(
+      DynamicJsArray obj, int index, int depth, boolean hasSeparator) {
+    JsType type = obj.typeofIndex(index);
+    if (type == null) {
+      return simpleInline("", "null", style.jsonNull(), depth, hasSeparator);
+    }
+    String title = "";
+    switch (type) {
+      case NUMBER:
+        return simpleInline(
+            title, String.valueOf(obj.getDouble(index)), style.jsonNumber(), depth, hasSeparator);
+      case INTEGER:
+        return simpleInline(
+            title, String.valueOf(obj.getInteger(index)), style.jsonNumber(), depth, hasSeparator);
+      case BOOLEAN:
+        return simpleInline(
+            title, String.valueOf(obj.getBoolean(index)), style.jsonBoolean(), depth, hasSeparator);
+      case STRING:
+        return inlineWidget(title, formatString(obj.getString(index)), depth, hasSeparator);
+      case ARRAY:
+        return formatGroup(new JsArrayIterable(obj.<DynamicJsArray>get(index), depth + 1), title,
+            depth, "[", "]", hasSeparator);
+      case OBJECT:
+        return formatGroup(new JsObjectIterable(obj.<DynamicJso>get(index), depth + 1), title,
+            depth, "{", "}", hasSeparator);
+    }
+    return new FlowPanel();
+  }
+
+  private static Widget formatValue(DynamicJso obj, String key, int depth, boolean hasSeparator) {
+    JsType type = obj.typeofKey(key);
+    if (type == null) {
+      return simpleInline(titleString(key), "null", style.jsonNull(), depth, hasSeparator);
+    }
+    String title = titleString(key);
+    switch (type) {
+      case NUMBER:
+        return simpleInline(
+            title, String.valueOf(obj.getDouble(key)), style.jsonNumber(), depth, hasSeparator);
+      case INTEGER:
+        return simpleInline(
+            title, String.valueOf(obj.getInteger(key)), style.jsonNumber(), depth, hasSeparator);
+      case BOOLEAN:
+        return simpleInline(
+            title, String.valueOf(obj.getBoolean(key)), style.jsonBoolean(), depth, hasSeparator);
+      case STRING:
+        return inlineWidget(title, formatString(obj.getString(key)), depth, hasSeparator);
+      case ARRAY:
+        return formatGroup(new JsArrayIterable(obj.<DynamicJsArray>get(key), depth + 1), title,
+            depth, "[", "]", hasSeparator);
+      case OBJECT:
+        return formatGroup(new JsObjectIterable(obj.<DynamicJso>get(key), depth + 1), title, depth,
+            "{", "}", hasSeparator);
+    }
+    return new FlowPanel();
+  }
+
+  private static Widget simpleInline(
+      String title, String inlineText, String style, int depth, boolean hasSeparator) {
+    Widget valueLabel = new InlineLabel(inlineText);
+    valueLabel.addStyleName(style);
+    return inlineWidget(title, Lists.newArrayList(valueLabel), depth, hasSeparator);
+  }
+
+  private static Widget inlineWidget(
+      String title, List<Widget> inlineWidgets, int depth, boolean hasSeparator) {
+
+    FlowPanel inlinePanel = new FlowPanel();
+
+    StringBuilder keyText = new StringBuilder(indentation(depth)).append(title);
+    InlineLabel keyLabel = new InlineLabel(keyText.toString());
+    keyLabel.addStyleName(style.jsonKey());
+    inlinePanel.add(keyLabel);
+
+    for (Widget child : inlineWidgets) {
+      inlinePanel.add(child);
+    }
+
+    if (hasSeparator) {
+      inlinePanel.add(new InlineLabel(SEPARATOR_TEXT));
+    }
+
+    return inlinePanel;
+  }
+
+  private static String indentation(int depth) {
+    return Strings.repeat(" ", depth);
+  }
+
+  private static List<Widget> formatString(String rawText) {
+    if (isLink(rawText)) {
+      List<Widget> response = Lists.newArrayList();
+      response.add(new InlineLabel("\""));
+
+      boolean createdExplorerLink = false;
       try {
-        return wrapInExplorerAnchor(url, entry);
-      } catch (Exception e) {
-        // Fall through here in case the Explorer link cannot be successfully
-        // constructed. The link will be treated as a regular link.
+        Entry<String, ApiMethod> method = getMethodForUrl(rawText);
+        if (method != null) {
+          String explorerLink = createExplorerLink(rawText, method);
+          InlineHyperlink linkObject = new InlineHyperlink(rawText, explorerLink);
+          linkObject.addStyleName(style.jsonStringExplorerLink());
+          response.add(linkObject);
+          createdExplorerLink = true;
+        }
+      } catch (IndexOutOfBoundsException e) {
+        // Intentionally blank - this will only happen when iterating the method
+        // url template in parallel with the url components and you run out of
+        // components
       }
+
+      if (!createdExplorerLink) {
+        Anchor linkObject = new Anchor(rawText, rawText, OPEN_IN_NEW_WINDOW);
+        linkObject.addStyleName(style.jsonStringLink());
+        response.add(linkObject);
+      }
+
+      response.add(new InlineLabel("\""));
+      return response;
+    } else {
+      Widget stringText = new InlineLabel("\"" + rawText + "\"");
+      stringText.addStyleName(style.jsonString());
+      return Lists.newArrayList(stringText);
     }
-    AnchorElement a = DOCUMENT.createAnchorElement();
-    a.setInnerText(url);
-    a.setClassName(STYLE.responseLine() + " " + STYLE.jsonStringLink());
-    a.setHref(url);
-    a.setTarget("_blank");
-    return a;
+  }
+
+  private static String titleString(String name) {
+    return "\"" + name + "\": ";
   }
 
   /**
@@ -129,7 +385,7 @@ public class JsonPrettifier {
    * name of the method, and the value is the {@link ApiMethod} itself. If no
    * method is found, this will return {@code null}.
    */
-  private static Map.Entry<String, ApiMethod> getMethodForUrl(String url) {
+  static Map.Entry<String, ApiMethod> getMethodForUrl(String url) {
     String apiLinkPrefix = Config.getBaseUrl() + appState.getCurrentService().getBasePath();
     if (!url.startsWith(apiLinkPrefix)) {
       return null;
@@ -145,9 +401,10 @@ public class JsonPrettifier {
                 return input.getValue().getHttpMethod() == HttpMethod.GET;
               }
             });
+
+    int paramIndex = url.indexOf("?");
+    String path = url.substring(0, paramIndex > 0 ? paramIndex : url.length());
     for (Map.Entry<String, ApiMethod> entry : getMethods) {
-      int paramIndex = url.indexOf("?");
-      String path = url.substring(0, paramIndex > 0 ? paramIndex : url.length());
       // Try to match the request URL with its method by comparing it to the
       // method's rest base path URI template. To do this we have to remove the
       // {...} placeholders.
@@ -161,26 +418,12 @@ public class JsonPrettifier {
   }
 
   /**
-   * Wraps the URL in an anchor that points to the {@link ApiMethod} contained
-   * in the entry. This assumes that the entry is non-null, signifying that a
-   * relevant method to link to has been identified.
-   */
-  private static AnchorElement wrapInExplorerAnchor(String url, Entry<String, ApiMethod> entry) {
-    AnchorElement a = DOCUMENT.createAnchorElement();
-    a.setInnerText(url);
-    a.setClassName(STYLE.responseLine() + " " + STYLE.jsonStringExplorerLink());
-    a.setHref(createExplorerLink(url, entry));
-    a.setTitle("Click to load this request in the APIs Explorer");
-    return a;
-  }
-
-  /**
    * Creates an Explorer link token (e.g.,
    * #_s=<service>&_v=<version>&_m=<method>) corresponding to the given request
    * URL, given the method name and method definition returned by
    * {@link #getMethodForUrl(String)}.
    */
-  private static String createExplorerLink(String url, Entry<String, ApiMethod> entry) {
+  static String createExplorerLink(String url, Entry<String, ApiMethod> entry) {
     String path = url.substring(url.indexOf('?') + 1);
     StringBuilder tokenBuilder = new StringBuilder()
         .append("#_s=")
@@ -211,159 +454,8 @@ public class JsonPrettifier {
     return tokenBuilder.toString();
   }
 
-  /** Syntax highlights an array element based on its type. */
-  private static SpanElement arrValueToElement(DynamicJsArray arr, int index) {
-    JsType type = arr.typeofIndex(index);
-    if (type == null) {
-      return wrapInSpan("null", STYLE.jsonNull());
-    }
-    switch (type) {
-      case NUMBER:
-        return wrapInSpan(String.valueOf(arr.getDouble(index)), STYLE.jsonNumber());
-      case INTEGER:
-        return wrapInSpan(String.valueOf(arr.getInteger(index)), STYLE.jsonNumber());
-      case BOOLEAN:
-        return wrapInSpan(String.valueOf(arr.getBoolean(index)), STYLE.jsonBoolean());
-      case STRING:
-        return wrapStringValue(arr.getString(index));
-      case ARRAY:
-        return arrayToElement(arr.<DynamicJsArray>get(index));
-      case OBJECT:
-        return objectToElement(arr.<DynamicJso>get(index));
-    }
-    return DOCUMENT.createSpanElement();
-  }
-
-  /**
-   * Wraps a string value in a span. If the string value represents a link, the
-   * string will be made into a link by {@link #wrapInAnchor(String)}.
-   */
-  private static SpanElement wrapStringValue(String value) {
-    if (isLink(value)) {
-      SpanElement span = DOCUMENT.createSpanElement();
-      span.appendChild(wrapInSpan("\""));
-      span.appendChild(wrapInAnchor(value));
-      span.appendChild(wrapInSpan("\""));
-      return span;
-    } else {
-      return wrapInSpan("\"" + fixQuotes(value) + "\"",
-          STYLE.jsonString() + " " + STYLE.responseLine());
-    }
-  }
-
-  /**
-   * Fix quotes in JSON strings by escaping them. Without this, the JSON we
-   * display will not be valid JSON.
-   */
-  private static String fixQuotes(String value) {
-    return value.replace("\"", "\\\"");
-
-  }
-
-  // TODO(jasonhall): This could be more robust.
   private static boolean isLink(String value) {
     return (value.startsWith("http://") || value.startsWith("https://")) && !value.contains("\n")
         && !value.contains("\t");
-  }
-
-  /** Syntax highlights an array. */
-  private static SpanElement arrayToElement(DynamicJsArray arr) {
-    SpanElement span = DOCUMENT.createSpanElement();
-    if (arr.length() == 0) {
-      span.setInnerText("[ ]");
-      return span;
-    }
-
-    span.appendChild(wrapInSpan("["));
-    span.appendChild(DOCUMENT.createBRElement());
-
-    indent();
-    span.appendChild(wrapInSpan(indentationSpaces()));
-
-    for (int i = 0; i < arr.length(); i++) {
-      SpanElement item = DOCUMENT.createSpanElement();
-      if (i > 0) {
-        span.appendChild(wrapInSpan(","));
-      }
-      item.appendChild(arrValueToElement(arr, i));
-      span.appendChild(item);
-    }
-    dedent();
-
-    span.appendChild(DOCUMENT.createBRElement());
-    span.appendChild(wrapInSpan(indentationSpaces() + "]"));
-    return span;
-  }
-
-  /** Syntax highlights an object's value based on its type. */
-  private static SpanElement objValueToElement(DynamicJso obj, String key) {
-    JsType type = obj.typeofKey(key);
-    if (type == null) {
-      return wrapInSpan("null", STYLE.jsonNull());
-    }
-    switch (type) {
-      case NUMBER:
-        return wrapInSpan(String.valueOf(obj.getDouble(key)), STYLE.jsonNumber());
-      case INTEGER:
-        return wrapInSpan(String.valueOf(obj.getInteger(key)), STYLE.jsonNumber());
-      case BOOLEAN:
-        return wrapInSpan(String.valueOf(obj.getBoolean(key)), STYLE.jsonBoolean());
-      case STRING:
-        return wrapStringValue(obj.getString(key));
-      case ARRAY:
-        return arrayToElement(obj.<DynamicJsArray>get(key));
-      case OBJECT:
-        return objectToElement(obj.<DynamicJso>get(key));
-    }
-    return DOCUMENT.createSpanElement();
-  }
-
-  /** Syntax highlights an object. */
-  private static SpanElement objectToElement(DynamicJso obj) {
-    JsArrayString keys = obj.keys();
-    SpanElement span = DOCUMENT.createSpanElement();
-
-    if (keys.length() == 0) {
-      span.setInnerText("{ }");
-      return span;
-    }
-
-    span.appendChild(wrapInSpan("{"));
-
-    indent();
-    for (int i = 0; i < keys.length(); i++) {
-      String key = keys.get(i);
-      SpanElement item = DOCUMENT.createSpanElement();
-      item.appendChild(wrapInSpan(indentationSpaces() + "\""));
-      item.appendChild(wrapInSpan(key, STYLE.jsonKey()));
-      item.appendChild(wrapInSpan("\": "));
-      item.appendChild(objValueToElement(obj, key));
-      if (i < keys.length() - 1) {
-        item.appendChild(wrapInSpan(","));
-      }
-      span.appendChild(DOCUMENT.createBRElement());
-      span.appendChild(item);
-    }
-    dedent();
-
-    span.appendChild(DOCUMENT.createBRElement());
-    span.appendChild(wrapInSpan(indentationSpaces() + "}"));
-    return span;
-  }
-
-  private static void indent() {
-    indent += INDENT_BY;
-  }
-
-  private static void dedent() {
-    indent -= INDENT_BY;
-  }
-
-  /**
-   * Returns a string filled with a number of spaces corresponding to the
-   * current indentation level.
-   */
-  private static String indentationSpaces() {
-    return Strings.repeat(" ", indent);
   }
 }
