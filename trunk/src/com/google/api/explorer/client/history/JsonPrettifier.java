@@ -70,10 +70,10 @@ public class JsonPrettifier {
 
     // Don't bother syntax highlighting empty text.
     boolean empty = Strings.isNullOrEmpty(jsonString);
+    UIObject.setVisible(parent, !empty);
     if (empty) {
       return;
     }
-    UIObject.setVisible(parent, !empty);
     
     if (!GWT.isScript()) {
       // Syntax highlighting is *very* slow in Development Mode (~30s for large

@@ -22,8 +22,9 @@ import com.google.common.collect.Lists;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
@@ -75,9 +76,10 @@ public class EnumEditor extends Editor {
    * {@link EditorView} implementation for displaying enum values using a
    * {@link SuggestBox}.
    */
-  static class EnumEditorViewImpl extends SimplePanel implements EditorView {
+  static class EnumEditorViewImpl extends FlowPanel implements EditorView {
 
     private SuggestBox suggestBox;
+    private Label errorMessage;
 
     EnumEditorViewImpl(final List<String> enumValues, final List<String> enumDescriptions) {
       // Sets up a SuggestOracle that, when the textbox has focus, displays the
@@ -97,6 +99,10 @@ public class EnumEditor extends Editor {
         }
       });
       add(suggestBox);
+
+      this.errorMessage = new Label("This parameter is invalid.");
+      errorMessage.setVisible(false);
+      add(errorMessage);
     }
 
     class EnumSuggestion implements Suggestion {
@@ -142,10 +148,11 @@ public class EnumEditor extends Editor {
     @Override
     public void displayValidation(boolean valid) {
       if (valid) {
-        suggestBox.removeStyleName(Resources.INSTANCE.style().invalidParameter());
+        removeStyleName(Resources.INSTANCE.style().invalidParameter());
       } else {
-        suggestBox.addStyleName(Resources.INSTANCE.style().invalidParameter());
+        addStyleName(Resources.INSTANCE.style().invalidParameter());
       }
+      errorMessage.setVisible(!valid);
     }
   }
 }

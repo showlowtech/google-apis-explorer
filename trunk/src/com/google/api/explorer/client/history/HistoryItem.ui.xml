@@ -64,9 +64,9 @@
 
       <h3>Response</h3>
       <pre ui:field="statusDiv" />
-      <g:InlineLabel ui:field="showHideHeaders" styleName="{style.showHideHeaders}">
+      <g:Label ui:field="showHideHeaders" styleName="{style.showHideHeaders}">
         - Show headers -
-      </g:InlineLabel>
+      </g:Label>
       <pre ui:field="responseHeadersDiv" />
       <pre ui:field="responseBodyDiv" class="{style.response}" />
     </div>

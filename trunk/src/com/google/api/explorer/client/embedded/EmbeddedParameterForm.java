@@ -60,7 +60,6 @@ public class EmbeddedParameterForm extends ParameterForm implements ParameterFor
 
   public EmbeddedParameterForm(EventBus eventBus, AppState appState, AuthManager authManager) {
     super(eventBus, appState, authManager);
-    bodyDisclosure.addStyleName(Resources.INSTANCE.style().clickable());
   }
 
   @Override
@@ -98,7 +97,9 @@ public class EmbeddedParameterForm extends ParameterForm implements ParameterFor
 
     // Add a row for the fields parameter.
     Schema responseSchema = appState.getCurrentService().responseSchema(method);
-    addFieldsRow(responseSchema, row);
+    addFieldsRow(responseSchema, row++);
+    addRequestBodyRow(row++);
+    addExecuteRow(row);
 
     // Reset the schema editor to having the Guided View selected
     tabPanel.selectTab(0 /* Guided View */);
@@ -190,8 +191,33 @@ public class EmbeddedParameterForm extends ParameterForm implements ParameterFor
     // Add the description (and maybe fields editor link) to the table.
     table.setWidget(row, 2, panel);
 
-    cellFormatter.setStyleName(row, 0, EmbeddedResources.INSTANCE.style().parameterFormNameCell());
+    cellFormatter.addStyleName(row, 0, EmbeddedResources.INSTANCE.style().parameterFormNameCell());
     cellFormatter.addStyleName(row, 2,
         EmbeddedResources.INSTANCE.style().parameterFormDescriptionCell());
+  }
+  
+  private void addRequestBodyRow(int row) {
+    table.setText(row, 0, "Request body");
+    table.setWidget(row, 1, this.bodyDisclosure);
+    table.setText(row, 2, "");
+    
+    cellFormatter.addStyleName(row, 0, EmbeddedResources.INSTANCE.style().parameterFormNameCell());
+  }
+  
+  private void addExecuteRow(int row) {
+    table.setWidget(row, 0, requiredDescription);
+    table.setWidget(row, 1, this.submit);
+    table.setText(row, 2, "");
+    
+    cellFormatter.addStyleName(row, 0, EmbeddedResources.INSTANCE.style().requiredParameter());
+    cellFormatter.addStyleName(row, 0, EmbeddedResources.INSTANCE.style().parameterFormNameCell());
+  }
+  
+  /**
+   * Enables/disables the "Execute" button.
+   */
+  @Override
+  public void setExecuting(boolean executing) {
+    submit.setEnabled(!executing);
   }
 }

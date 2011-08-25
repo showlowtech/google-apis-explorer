@@ -3,9 +3,6 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:with field='res' type='com.google.api.explorer.client.Resources' />
   <ui:style>
-    .item {
-    }
-
     .item h3 {
       margin-left: 10px;
       font-weight: normal;
@@ -32,21 +29,22 @@
       font-size: 10px;
     }
 
-    pre {
+    .wireTraffic {
       font-size: 13px;
       font-family: "Courier New", Courier, monospace;
       background-color: #FAFAFA;
-      border: 1px solid #BBBBBB;
-      padding: 11px;
+      border: 1px solid #ebebeb;
+      padding: 0 11px;
       overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .wireTraffic pre {
+      margin: 0;
     }
 
     .body {
       width: 100%;
-    }
-
-    .response {
-      white-space: pre-wrap;
     }
 
     .showHideHeaders {
@@ -57,14 +55,15 @@
     }
 
     .error {
-      background-color: red;
-      padding-left: 18px;
-      height: 29px;
-      padding-top: 12px;
-      padding-left: 8px;
+      background-color: #DD4B39;
       color: white;
-      font-weight: bold;
-      width: auto;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      border-radius: 2px;
+      font-size: 11px;
+      line-height: 29px;
+      width: 600px;
+      margin: -11px auto -14px auto;
     }
 </ui:style>
   <g:HTMLPanel styleName="{style.item}">
@@ -77,16 +76,20 @@
     <div ui:field="collapseDiv" class="{style.body}">
       <g:SimplePanel ui:field="errorPanel" styleName="{style.error}" visible="false" />
       <h3>Request</h3>
-      <pre ui:field="requestDiv" />
-      <pre ui:field="requestBodyDiv" class="{style.response}"/>
+      <div class="{style.wireTraffic}">
+        <pre ui:field="requestDiv" />
+        <pre ui:field="requestBodyDiv"/>
+      </div>
 
       <h3>Response</h3>
-      <pre ui:field="statusDiv" />
-      <g:InlineLabel ui:field="showHideHeaders" styleName="{style.showHideHeaders}">
-        - Show headers -
-      </g:InlineLabel>
-      <pre ui:field="responseHeadersDiv" />
-      <pre ui:field="responseBodyDiv" class="{style.response}" />
+      <div class="{style.wireTraffic}">
+        <pre ui:field="statusDiv" />
+        <g:Label ui:field="showHideHeaders" styleName="{style.showHideHeaders}">
+          - Show headers -
+        </g:Label>
+        <pre ui:field="responseHeadersDiv" />
+        <pre ui:field="responseBodyDiv" />
+      </div>
     </div>
   </g:HTMLPanel>
 </ui:UiBinder>
