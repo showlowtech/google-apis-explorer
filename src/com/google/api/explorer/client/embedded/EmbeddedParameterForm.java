@@ -20,6 +20,7 @@ import com.google.api.explorer.client.AppState;
 import com.google.api.explorer.client.AuthManager;
 import com.google.api.explorer.client.Resources;
 import com.google.api.explorer.client.base.ApiMethod;
+import com.google.api.explorer.client.base.ApiMethod.HttpMethod;
 import com.google.api.explorer.client.base.ApiParameter;
 import com.google.api.explorer.client.base.Schema;
 import com.google.api.explorer.client.editors.Editor;
@@ -98,7 +99,14 @@ public class EmbeddedParameterForm extends ParameterForm implements ParameterFor
     // Add a row for the fields parameter.
     Schema responseSchema = appState.getCurrentService().responseSchema(method);
     addFieldsRow(responseSchema, row++);
-    addRequestBodyRow(row++);
+
+    // (Maybe) add row for request body editor.
+    boolean canHaveRequestBody = method.getHttpMethod() != HttpMethod.GET;
+    if (canHaveRequestBody) {
+      addRequestBodyRow(row++);
+    }
+    bodyDisclosure.setVisible(canHaveRequestBody);
+
     addExecuteRow(row);
 
     // Reset the schema editor to having the Guided View selected
