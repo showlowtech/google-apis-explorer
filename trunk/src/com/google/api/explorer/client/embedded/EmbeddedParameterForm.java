@@ -34,7 +34,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.uibinder.client.UiTemplate;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
@@ -59,8 +62,17 @@ public class EmbeddedParameterForm extends ParameterForm implements ParameterFor
   interface EmbeddedParameterFormUiBinder extends UiBinder<Widget, EmbeddedParameterForm> {
   }
 
+  @UiField public Label requiredDescriptionLabel;
+  @UiField Button bodyDisclosureButton;
+
   public EmbeddedParameterForm(EventBus eventBus, AppState appState, AuthManager authManager) {
     super(eventBus, appState, authManager);
+  }
+
+  @UiHandler("bodyDisclosureButton")
+  public void openEditor(ClickEvent event) {
+    popupPanel.show();
+    popupPanel.center();
   }
 
   @Override
@@ -74,7 +86,7 @@ public class EmbeddedParameterForm extends ParameterForm implements ParameterFor
     // Reset the state of the form.
     setVisible(true);
     requiredDescription.setVisible(false);
-    bodyDisclosure.setText(ADD_REQ_BODY);
+    setBodyDisclosureWidgetText(ADD_REQ_BODY);
     nameToEditor.clear();
 
     // Reset the table's contents, clear it out.
@@ -121,6 +133,11 @@ public class EmbeddedParameterForm extends ParameterForm implements ParameterFor
     }
   }
 
+  @Override
+  protected void setBodyDisclosureWidgetText(String text) {
+    bodyDisclosureButton.setText(text);
+  }
+
   /**
    * Adds a row to the table containing the parameter name, whether it is
    * required, and an {@link Editor} to provide a value.
@@ -150,13 +167,15 @@ public class EmbeddedParameterForm extends ParameterForm implements ParameterFor
 
     cellFormatter.addStyleName(row, 0,
         EmbeddedResources.INSTANCE.style().parameterFormNameCell());
+    cellFormatter.addStyleName(row, 1,
+        EmbeddedResources.INSTANCE.style().parameterFormEditorCell());
     cellFormatter.addStyleName(row, 2,
         EmbeddedResources.INSTANCE.style().parameterFormDescriptionCell());
   }
 
   /**
    * Adds a row to the table to edit the partial fields mask.
-   * 
+   *
    * @param responseSchema Definition of the response object being described.
    * @param row Row index to begin adding rows to the parameter form table.
    */
@@ -169,7 +188,7 @@ public class EmbeddedParameterForm extends ParameterForm implements ParameterFor
     // appropriate styling)
     fieldsTextBox.setText("");
     table.setWidget(row, 1, fieldsTextBox);
-    
+
     // Start adding the next cell which will have the description of this param,
     // and potentially a link to open the fields editor.
     HTMLPanel panel = new HTMLPanel("");
@@ -200,27 +219,33 @@ public class EmbeddedParameterForm extends ParameterForm implements ParameterFor
     table.setWidget(row, 2, panel);
 
     cellFormatter.addStyleName(row, 0, EmbeddedResources.INSTANCE.style().parameterFormNameCell());
+    cellFormatter.addStyleName(row, 1,
+        EmbeddedResources.INSTANCE.style().parameterFormEditorCell());
     cellFormatter.addStyleName(row, 2,
         EmbeddedResources.INSTANCE.style().parameterFormDescriptionCell());
   }
-  
+
   private void addRequestBodyRow(int row) {
     table.setText(row, 0, "Request body");
     table.setWidget(row, 1, this.bodyDisclosure);
     table.setText(row, 2, "");
-    
+
     cellFormatter.addStyleName(row, 0, EmbeddedResources.INSTANCE.style().parameterFormNameCell());
+    cellFormatter.addStyleName(row, 1,
+        EmbeddedResources.INSTANCE.style().parameterFormEditorCell());
   }
-  
+
   private void addExecuteRow(int row) {
     table.setWidget(row, 0, requiredDescription);
     table.setWidget(row, 1, this.submit);
     table.setText(row, 2, "");
-    
-    cellFormatter.addStyleName(row, 0, EmbeddedResources.INSTANCE.style().requiredParameter());
+    requiredDescriptionLabel.addStyleName(EmbeddedResources.INSTANCE.style().requiredParameter());
+
     cellFormatter.addStyleName(row, 0, EmbeddedResources.INSTANCE.style().parameterFormNameCell());
+    cellFormatter.addStyleName(row, 1,
+        EmbeddedResources.INSTANCE.style().parameterFormEditorCell());
   }
-  
+
   /**
    * Enables/disables the "Execute" button.
    */

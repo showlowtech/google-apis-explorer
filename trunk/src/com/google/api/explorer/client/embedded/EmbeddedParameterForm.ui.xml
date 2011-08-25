@@ -25,7 +25,7 @@
     }
 
     .section input {
-      width: 100%;
+      width: 190px;
       border: 1px solid silver;
       height: 29px;
     }
@@ -44,7 +44,8 @@
       margin-top: 0;
     }
 
-    .showRequestBody {
+    .showRequestBody,
+    .popup button {
       text-align: center;
       background-color: #F5F5F5;
       border: 1px solid rgba(0,0,0,0.1);
@@ -52,10 +53,10 @@
       border-radius: 2px;
       font-weight: bold;
       font-size: 11px;
-      height: 27px;
+      height: 29px;
       line-height: 27px;
       cursor: default;
-      width: 104%;
+      width: 200px;
     }
 
     .showRequestBody:hover {
@@ -94,9 +95,9 @@
       font-size: 11px;
       cursor: default;
       height: 29px;
-      padding: 7px;
       border: 1px solid #3079ed;
       color: #FFF;
+      width: 200px;
       background-color: #4d90fe;
       background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#4787ed));
       background-image: -webkit-linear-gradient(top,#4d90fe,#4787ed);
@@ -105,10 +106,6 @@
       background-image: -o-linear-gradient(top,#4d90fe,#4787ed);
       background-image: linear-gradient(top,#4d90fe,#4787ed);
       filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#4d90fe',EndColorStr='#4787ed');
-    }
-
-    .execute {
-      width: 104%;
     }
 
     .execute:hover,
@@ -154,6 +151,10 @@
       color: #666;
       padding-bottom: 12px;
     }
+
+    .bodyDisclosureContainer {
+      display: inline;
+    }
   </ui:style>
   <g:HTMLPanel styleName="{style.section} form">
     <div class="{style.body}">
@@ -198,11 +199,19 @@
     </div>
 
     <!--  These will all be moved into the table itself. -->
-    <g:Label ui:field="bodyDisclosure" styleName="{style.showRequestBody}">
-      Show request body
-    </g:Label>
+    <g:FlowPanel ui:field="bodyDisclosure" styleName="{style.bodyDisclosureContainer}">
+      <g:Button ui:field="bodyDisclosureButton" styleName="{style.showRequestBody}">
+        Add request body
+      </g:Button>
+    </g:FlowPanel>
     <g:Button styleName="{style.execute}" ui:field="submit">Execute</g:Button>
     <img class="{style.executing}" ui:field="executing" />
-    <g:InlineLabel ui:field="requiredDescription">Required fields are in bold</g:InlineLabel>
+    <g:FlowPanel ui:field="requiredDescription">
+      <g:InlineLabel ui:field="requiredDescriptionLabel">bold red</g:InlineLabel>
+      <g:InlineLabel>&nbsp;= required</g:InlineLabel>
+    </g:FlowPanel>
+
+    <!--  This is unused but must be present to stay compliant with the subclass -->
+    <g:Label ui:field="bodyDisclosureLabel" visible="false">Unused</g:Label>
   </g:HTMLPanel>
 </ui:UiBinder>

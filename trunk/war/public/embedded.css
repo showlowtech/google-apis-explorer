@@ -13,6 +13,10 @@
   color: #666;
 }
 
+.parameterFormEditorCell {
+  width: 200px;
+}
+
 .bodyDisclosure {
   padding-top: 14px;
 }

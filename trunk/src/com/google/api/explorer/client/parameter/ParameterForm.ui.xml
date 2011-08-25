@@ -100,12 +100,22 @@
       color: #666;
       padding-bottom: 12px;
     }
+
+    .requiredDescriptionContainer {
+      display: inline;
+    }
+
+    .bodyDisclosureContainer {
+      display: inline;
+    }
   </ui:style>
   <g:HTMLPanel styleName="{style.section}">
     <g:Label styleName="{style.header}">Fill in parameters</g:Label>
     <div class="{style.body}">
       <g:FlexTable ui:field="table" />
-      <g:Label ui:field="bodyDisclosure" styleName="{style.showRequestBody}" />
+      <g:FlowPanel ui:field="bodyDisclosure" styleName="{style.bodyDisclosureContainer}">
+        <g:Label ui:field="bodyDisclosureLabel" styleName="{style.showRequestBody}" />
+      </g:FlowPanel>
 
       <g:PopupPanel ui:field="popupPanel" modal="true">
         <g:HTMLPanel styleName="{style.popup}">
@@ -147,9 +157,11 @@
     <div class="{style.footer}">
       <g:Button ui:field="submit">Execute</g:Button>
       <img class="{style.executing}" ui:field="executing" />
-      <g:InlineLabel ui:field="requiredDescription">&nbsp;*
-        required field
-      </g:InlineLabel>
+      <g:FlowPanel styleName="{style.requiredDescriptionContainer}" ui:field="requiredDescription">
+        <g:InlineLabel>&nbsp;*
+          required field
+        </g:InlineLabel>
+      </g:FlowPanel>
     </div>
   </g:HTMLPanel>
 </ui:UiBinder>

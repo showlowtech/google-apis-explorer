@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -45,6 +45,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -65,7 +66,7 @@ import javax.annotation.Nullable;
 
 /**
  * View of the parameter form UI.
- * 
+ *
  * @author jasonhall@google.com (Jason Hall)
  */
 public class ParameterForm extends Composite implements ParameterFormPresenter.Display {
@@ -81,8 +82,9 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
   }
 
   @UiField public FlexTable table;
-  @UiField public Label bodyDisclosure;
-  @UiField public InlineLabel requiredDescription;
+  @UiField public FlowPanel bodyDisclosure;
+  @UiField public Label bodyDisclosureLabel;
+  @UiField public FlowPanel requiredDescription;
   @UiField public Button submit;
   @UiField public ImageElement executing;
 
@@ -139,7 +141,7 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
     presenter.submit();
   }
 
-  @UiHandler("bodyDisclosure")
+  @UiHandler("bodyDisclosureLabel")
   public void open(ClickEvent event) {
     popupPanel.show();
     popupPanel.center();
@@ -147,7 +149,7 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
 
   @UiHandler("close")
   public void close(ClickEvent event) {
-    bodyDisclosure.setText(getBodyText().isEmpty() ? ADD_REQ_BODY : CHANGE_REQ_BODY);
+    setBodyDisclosureWidgetText(getBodyText().isEmpty() ? ADD_REQ_BODY : CHANGE_REQ_BODY);
     popupPanel.hide();
   }
 
@@ -161,7 +163,7 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
   @Override
   public void setMethod(ApiMethod method, SortedMap<String, ApiParameter> sortedParams) {
     requiredDescription.setVisible(false);
-    bodyDisclosure.setText(ADD_REQ_BODY);
+    setBodyDisclosureWidgetText(ADD_REQ_BODY);
 
     // Don't show the "Add request body" link if the method is a GET.
     bodyDisclosure.setVisible(method.getHttpMethod() != HttpMethod.GET);
@@ -234,7 +236,7 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
 
   /**
    * Adds a row to the table to edit the partial fields mask.
-   * 
+   *
    * @param responseSchema Definition of the response object being described.
    * @param row Row index to begin adding rows to the parameter form table.
    */
@@ -295,6 +297,10 @@ public class ParameterForm extends Composite implements ParameterFormPresenter.D
     }
 
     return Strings.nullToEmpty(parameter.getDescription());
+  }
+
+  protected void setBodyDisclosureWidgetText(String text) {
+    bodyDisclosureLabel.setText(text);
   }
 
   /** Return a {@link Map} of parameter keys to values as specified by the user. */
