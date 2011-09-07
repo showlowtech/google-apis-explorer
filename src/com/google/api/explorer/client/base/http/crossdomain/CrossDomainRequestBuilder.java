@@ -18,10 +18,9 @@ package com.google.api.explorer.client.base.http.crossdomain;
 
 import com.google.api.explorer.client.base.ApiRequest;
 import com.google.api.explorer.client.base.ApiResponse;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.ScriptElement;
-import com.google.gwt.user.client.Timer;
+import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
@@ -55,20 +54,16 @@ public class CrossDomainRequestBuilder {
 
     /** Adds a script tag to the page to load the JS library used to make requests. */
     if (!scriptLoaded()) {
-      ScriptElement script = Document.get().createScriptElement();
-      script.setSrc(JS_CLIENT_URL);
-      Document.get().getElementsByTagName("head").getItem(0).appendChild(script);
-
-      new Timer() {
-        @Override
-        public void run() {
-          if (scriptLoaded()) {
-            setBaseUrl();
-            doMakeRequest(request, xdr);
-            cancel();
-          }
+      ScriptInjector.fromUrl(JS_CLIENT_URL).setCallback(new Callback<Void, Exception>() {
+        public void onSuccess(Void result) {
+          setBaseUrl();
+          doMakeRequest(request, xdr);
         }
-      }.scheduleRepeating(100);
+
+        public void onFailure(Exception e) {
+          throw new RuntimeException(e);
+        }
+      }).inject();
     } else {
       doMakeRequest(request, xdr);
     }
