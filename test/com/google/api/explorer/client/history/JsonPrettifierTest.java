@@ -19,10 +19,13 @@ package com.google.api.explorer.client.history;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 
-import com.google.api.explorer.client.AppState;
 import com.google.api.explorer.client.base.ApiMethod;
 import com.google.api.explorer.client.base.ApiMethod.HttpMethod;
 import com.google.api.explorer.client.base.ApiService;
+import com.google.api.explorer.client.base.TestUrlEncoder;
+import com.google.api.explorer.client.base.UrlEncoder;
+import com.google.api.explorer.client.base.rest.RestApiService;
+import com.google.api.explorer.client.routing.UrlBuilder;
 import com.google.common.collect.Maps;
 
 import junit.framework.TestCase;
@@ -36,52 +39,56 @@ import java.util.Map;
  *
  */
 public class JsonPrettifierTest extends TestCase {
-  private static final String BUZZ_BASE_PATH = "/buzz/v1/";
-  private static final String BUZZ_LINK =
-      "https://www.googleapis.com/buzz/v1/activities/123456789/@public?alt=json";
+  private static final String PLUS_BASE_PATH = "/plus/v1/";
+  private static final String PLUS_LINK =
+      "https://www.googleapis.com/plus/v1/people/123456789/activities/public?";
   private static final String EXPLORER_LINK =
-      "#_s=buzz&_v=v1&_m=activities.list&alt=json&userId=123456789&scope=@public";
-  private static final String LIST_METHOD_NAME = "activities.list";
-  private static final String LIST_METHOD_PATH = "activities/{userId}/{scope}";
-  private static final String BUZZ_NAME = "buzz";
-  private static final String BUZZ_VERSION = "v1";
+      "s/plus/v1/plus.activities.list?userId=123456789&collection=public&";
+  private static final String LIST_METHOD_NAME = "plus.activities.list";
+  private static final String LIST_METHOD_PATH = "people/{userId}/activities/{collection}";
+  private static final String PLUS_NAME = "plus";
+  private static final String PLUS_VERSION = "v1";
 
-  private AppState mockAppState;
+  private ApiService plusService;
+  private UrlEncoder originalEncoder;
 
   @Override
   public void setUp() {
     ApiMethod listActivities = EasyMock.createNiceMock(ApiMethod.class);
     expect(listActivities.getHttpMethod()).andReturn(HttpMethod.GET).anyTimes();
     expect(listActivities.getPath()).andReturn(LIST_METHOD_PATH).anyTimes();
+    expect(listActivities.getId()).andReturn(LIST_METHOD_NAME).anyTimes();
     replay(listActivities);
 
     Map<String, ApiMethod> allActivities = Maps.newHashMap();
     allActivities.put(LIST_METHOD_NAME, listActivities);
 
-    ApiService buzzService = EasyMock.createNiceMock(ApiService.class);
-    expect(buzzService.getBasePath()).andReturn(BUZZ_BASE_PATH).anyTimes();
-    expect(buzzService.allMethods()).andReturn(allActivities).anyTimes();
-    expect(buzzService.getName()).andReturn(BUZZ_NAME).anyTimes();
-    expect(buzzService.getVersion()).andReturn(BUZZ_VERSION).anyTimes();
-    replay(buzzService);
+    plusService = EasyMock.createNiceMock(RestApiService.class);
+    expect(plusService.basePath()).andReturn(PLUS_BASE_PATH).anyTimes();
+    expect(plusService.allMethods()).andReturn(allActivities).anyTimes();
+    expect(plusService.getName()).andReturn(PLUS_NAME).anyTimes();
+    expect(plusService.getVersion()).andReturn(PLUS_VERSION).anyTimes();
+    replay(plusService);
 
-    mockAppState = EasyMock.createNiceMock(AppState.class);
-    expect(mockAppState.getCurrentService()).andReturn(buzzService).anyTimes();
-    replay(mockAppState);
+    originalEncoder = UrlBuilder.urlEncoder;
+    UrlBuilder.urlEncoder = new TestUrlEncoder();
+  }
 
-    JsonPrettifier.appState = mockAppState;
+  @Override
+  public void tearDown() {
+    UrlBuilder.urlEncoder = originalEncoder;
   }
 
   /**
    * Test the identification of explorer links
    */
   public void testExplorerLinks() {
-    Map.Entry<String, ApiMethod> method = JsonPrettifier.getMethodForUrl(BUZZ_LINK);
+    ApiMethod method = JsonPrettifier.getMethodForUrl(plusService, PLUS_LINK);
     assertNotNull(method);
-    assertEquals(LIST_METHOD_NAME, method.getKey());
-    assertEquals(HttpMethod.GET, method.getValue().getHttpMethod());
+    assertEquals(LIST_METHOD_NAME, method.getId());
+    assertEquals(HttpMethod.GET, method.getHttpMethod());
 
-    String link = JsonPrettifier.createExplorerLink(BUZZ_LINK, method);
+    String link = JsonPrettifier.createExplorerLink(plusService, PLUS_LINK, method);
     assertEquals(EXPLORER_LINK, link);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Google Inc.
+ * Copyright (C) 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,149 +16,84 @@
 
 package com.google.api.explorer.client.history;
 
-import com.google.api.explorer.client.ExplorerConfig;
-import com.google.api.explorer.client.Resources;
 import com.google.api.explorer.client.base.ApiRequest;
 import com.google.api.explorer.client.base.ApiResponse;
-import com.google.api.explorer.client.base.Config;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Ordering;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.PreElement;
-import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.common.base.Preconditions;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.SortedMap;
+import javax.annotation.concurrent.Immutable;
 
-public class HistoryItem extends Composite {
+/**
+ * A plain old data class which contains a historical record of a request.
+ *
+ */
+@Immutable
+public final class HistoryItem implements Comparable<HistoryItem> {
+  private final String key;
+  private final ApiRequest request;
+  private final ApiResponse response;
+  private final long startTime;
+  private final long endTime;
 
-  private static HistoryItemUiBinder uiBinder = GWT.create(HistoryItemUiBinder.class);
+  /**
+   * Create a new history item from the specified data.
+   *
+   * @param key Key which was used to store this history item and which can be used to reference it.
+   * @param request Original request object that was executed.
+   * @param response Response object that was returned when the original request was executed.
+   * @param startTime Time at which the request was started.
+   * @param endTime Time at which the request completed.
+   */
+  public HistoryItem(String key,
+      ApiRequest request,
+      ApiResponse response,
+      long startTime,
+      long endTime) {
 
-  interface HistoryItemUiBinder extends UiBinder<Widget, HistoryItem> {
+    this.key = Preconditions.checkNotNull(key);
+    this.request = Preconditions.checkNotNull(request);
+    this.response = Preconditions.checkNotNull(response);
+    this.startTime = startTime;
+    this.endTime = endTime;
   }
 
-  @UiField public FocusPanel titleBar;
-  @UiField public SpanElement title;
-  @UiField public SpanElement time;
-  @UiField public DivElement collapseDiv;
-  @UiField public SimplePanel errorPanel;
-  @UiField public PreElement requestDiv;
-  @UiField public FlowPanel requestBodyDiv;
-  @UiField public PreElement statusDiv;
-  @UiField public Label showHideHeaders;
-  @UiField public PreElement responseHeadersDiv;
-  @UiField public FlowPanel responseBodyDiv;
-
-  protected HistoryItem(String methodIdentifier, long timeMillis, ApiRequest request,
-      ApiResponse response) {
-    initWidget();
-    time.setInnerText("time to execute: " + timeMillis + " ms");
-
-    String prefix = methodIdentifier + " executed ";
-    PrettyDate.keepMakingPretty(new Date(), prefix, title);
-
-    String dateString =
-        DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(new Date());
-    title.setTitle(dateString);
-
-    requestDiv.setInnerText(getRequestString(request));
-
-    statusDiv.setInnerText(response.status + " " + response.statusText);
-
-    // Headers are hidden by default.
-    UIObject.setVisible(responseHeadersDiv, false);
-    responseHeadersDiv.setInnerText(getResponseHeadersString(response));
-    JsonPrettifier.prettify(requestBodyDiv, request.body);
-    JsonPrettifier.prettify(responseBodyDiv, response.body);
+  /**
+   * Returns the key which was used to store this history item and which can be used to reference
+   * it.
+   */
+  public String getKey() {
+    return key;
   }
 
-  protected void initWidget() {
-    initWidget(uiBinder.createAndBindUi(this));
+  /**
+   * Returns the original request object that was executed.
+   */
+  public ApiRequest getRequest() {
+    return request;
   }
 
-  @UiHandler("showHideHeaders")
-  public void showHide(ClickEvent event) {
-    showHideHeaders.setText(
-        UIObject.isVisible(responseHeadersDiv) ? "- Show headers -" : "- Hide headers -");
-    UIObject.setVisible(responseHeadersDiv, !UIObject.isVisible(responseHeadersDiv));
+  /**
+   * Returns the response object that was returned when the original request was executed.
+   */
+  public ApiResponse getResponse() {
+    return response;
   }
 
-  private static String getRequestString(ApiRequest request) {
-    StringBuilder sb = new StringBuilder()
-        .append(request.httpMethod.name())
-        .append(' ')
-        .append(Config.getBaseUrl())
-        // If the standard API key is being used, mask it in the UI.
-        // The URL is already URL-escaped before making the request, so we don't
-        // want to double-escape it.
-        .append(request.getRequestPath().replace("key=" + ExplorerConfig.API_KEY,
-            "key={YOUR_API_KEY}"));
-
-    // Display headers that were set on the request.
-    // TODO(jasonhall): This can be prettier.
-    sb.append('\n');
-    for (Map.Entry<String, String> entry : request.headers.entrySet()) {
-      sb.append('\n').append(entry.getKey()).append(":  ").append(entry.getValue());
-    }
-
-    return sb.toString();
+  /**
+   * Returns the time at which the request was started.
+   */
+  public long getStartTime() {
+    return startTime;
   }
 
-  private static String getResponseHeadersString(ApiResponse response) {
-    StringBuilder sb = new StringBuilder();
-
-    SortedMap<String, String> sorted = Maps.newTreeMap(Ordering.natural());
-    sorted.putAll(response.headers);
-
-    for (Map.Entry<String, String> entry : sorted.entrySet()) {
-      sb.append(entry.getKey()).append(":  ").append(entry.getValue()).append('\n');
-    }
-
-    return sb.toString();
+  /**
+   * Returns the time at which the request completed.
+   */
+  public long getEndTime() {
+    return endTime;
   }
 
-  @UiHandler("titleBar")
-  public void expandCollapse(ClickEvent event) {
-    if (UIObject.isVisible(collapseDiv)) {
-      collapse();
-    } else {
-      expand();
-    }
-  }
-
-  void expand() {
-    UIObject.setVisible(collapseDiv, true);
-    titleBar.removeStyleName(Resources.INSTANCE.style().collapsed());
-    titleBar.addStyleName(Resources.INSTANCE.style().expanded());
-  }
-
-  void collapse() {
-    UIObject.setVisible(collapseDiv, false);
-    titleBar.removeStyleName(Resources.INSTANCE.style().expanded());
-    titleBar.addStyleName(Resources.INSTANCE.style().collapsed());
-  }
-
-  public void clear() {
-    PrettyDate.stopMakingPretty(title);
-  }
-
-  void setErrorMessage(Widget prettyMessage) {
-    errorPanel.setVisible(true);
-    errorPanel.add(prettyMessage);
+  @Override
+  public int compareTo(HistoryItem o) {
+    return new Long(endTime).compareTo(o.endTime);
   }
 }

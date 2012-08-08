@@ -13,9 +13,9 @@
 
 package com.google.api.explorer.client.editors;
 
-import com.google.api.explorer.client.UrlEncoder;
-import com.google.api.explorer.client.base.ApiParameter;
-import com.google.api.explorer.client.base.ApiParameter.Type;
+import com.google.api.explorer.client.base.Schema;
+import com.google.api.explorer.client.base.Schema.Type;
+import com.google.api.explorer.client.base.UrlEncoder;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
@@ -34,21 +34,14 @@ public class EditorFactory {
   private static final List<String> TRUE_FALSE =
       ImmutableList.of(Boolean.TRUE.toString(), Boolean.FALSE.toString());
 
-  // The UI for repeated parameters is not yet fully baked, so this feature will
-  // be disabled for now. The unit test will still test the functionality
-  // though, and enables this for the test.
-  // TODO(jasonhall): Finalize UI for repeated parameters and remove this flag.
-  @VisibleForTesting
-  static boolean enableRepeatedParameters = false;
-
   @VisibleForTesting
   static UrlEncoder urlEncoder = UrlEncoder.DEFAULT;
 
   /**
    * Identifies the relevant {@link Editor} implementation for the given
-   * {@link ApiParameter}.
+   * {@link Schema}.
    */
-  public static Editor forParameter(ApiParameter parameter) {
+  public static Editor forParameter(Schema parameter) {
     return forParameter(parameter, false);
   }
 
@@ -61,8 +54,8 @@ public class EditorFactory {
    *        ignoreRepeated is true, this method is used to identify the
    *        correct inner editor to use.
    */
-  static Editor forParameter(ApiParameter parameter, boolean ignoreRepeated) {
-    if (enableRepeatedParameters && !ignoreRepeated && parameter.isRepeated()) {
+  static Editor forParameter(Schema parameter, boolean ignoreRepeated) {
+    if (!ignoreRepeated && parameter.isRepeated()) {
       return new RepeatedEditor(forParameter(parameter, true));
     }
 
@@ -93,7 +86,7 @@ public class EditorFactory {
     maybeAddValidatorTo(editor, new IntegerValidator(), type == Type.INTEGER);
     maybeAddValidatorTo(
         editor, new MinimumMaximumValidator(minimum, maximum), minimum != null || maximum != null);
-    maybeAddValidatorTo(editor, new DecimalValidator(), type == Type.DECIMAL);
+    maybeAddValidatorTo(editor, new DecimalValidator(), type == Type.NUMBER);
     maybeAddValidatorTo(editor, new RequiredValidator(), parameter.isRequired());
     maybeAddValidatorTo(editor, new PatternValidator(pattern), pattern != null);
     editor.addValidator(new UrlEncodingValidator());

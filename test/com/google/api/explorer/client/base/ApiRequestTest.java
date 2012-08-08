@@ -16,128 +16,89 @@
 
 package com.google.api.explorer.client.base;
 
-import com.google.api.explorer.client.TestUrlEncoder;
-import com.google.api.explorer.client.UrlEncoder;
 import com.google.api.explorer.client.base.ApiMethod.HttpMethod;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Maps;
 
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
+import java.util.Map;
 
 /**
- * Tests validation of parameter values and creation of request path in
- * {@link ApiRequest}s.
- *
- * @author jasonhall@google.com (Jason Hall)
  */
 public class ApiRequestTest extends TestCase {
+  private class MockApiRequest extends ApiRequest {
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
-    Config.setApiKey("");
-    ApiRequest.urlEncoder = new TestUrlEncoder();
-  }
+    public final Map<String, String> addedHeaders = Maps.newHashMap();
+    public String apiKey;
 
-  @Override
-  protected void tearDown() {
-    ApiRequest.urlEncoder = UrlEncoder.DEFAULT;
+    @Override
+    public void addHeader(String headerName, String headerValue) {
+      addedHeaders.put(headerName, headerValue);
+    }
+
+    @Override
+    public void setApiKey(String apiKey) {
+      this.apiKey = apiKey;
+    }
+
+    @Override
+    public Map<String, String> getHeaders() {
+      return null;
+    }
+
+    @Override
+    public HttpMethod getHttpMethod() {
+      return null;
+    }
+
+    @Override
+    public ListMultimap<String, String> getParamValues() {
+      return null;
+    }
+
+    @Override
+    public String getRequestBody() {
+      return null;
+    }
+
+    @Override
+    public String getRequestPath() {
+      return null;
+    }
+
+    @Override
+    public ApiService getService() {
+      return null;
+    }
+
+    @Override
+    public String getApiKey() {
+      return apiKey;
+    }
+
+    @Override
+    public void setTraceParameter(String traceParameter) {
+    }
+
+    @Override
+    public ApiMethod getMethod() {
+      return null;
+    }
   }
 
   /** When an API key is set, it is added as a parameter value. */
   public void testApiKey() {
-    ApiMethod method = EasyMock.createControl().createMock(ApiMethod.class);
-    EasyMock.expect(method.getHttpMethod()).andReturn(HttpMethod.GET);
-
-    ApiService service = EasyMock.createControl().createMock(ApiService.class);
-    EasyMock.expect(service.method("method")).andReturn(method);
-
-    EasyMock.replay(method, service);
-
-    ApiRequest request = new ApiRequest(service, "method");
-
+    MockApiRequest request = new MockApiRequest();
     Config.setApiKey("MY_API_KEY");
     request.maybeSetApiKeyParameter();
-    assertEquals(Lists.newArrayList("MY_API_KEY"), request.paramValues.get("key"));
-    EasyMock.verify(method, service);
+    assertEquals("MY_API_KEY", request.apiKey);
   }
 
-  /**
-   * Tests expected request properties when given a request path and HTTP
-   * method.
-   */
-  public void testCreateRequestWithPath() {
-    ApiRequest request = new ApiRequest("/some/path");
-
-    assertEquals("/some/path", request.getRequestPath());
-    assertEquals(HttpMethod.GET, request.httpMethod);
-    assertNull(request.method);
-    assertNull(request.service);
-
-    // Setting the API key does not make it appear in the query
-    Config.setApiKey("MY_API_KEY");
-    assertEquals("/some/path", request.getRequestPath());
-    // TODO(jasonhall): Test creating a request with query parameters.
-  }
-
-  /** Tests proper creation of the Discovery path and error cases. */
-  public void testDiscoveryPath() {
-    assertEquals("/discovery/v1/apis/service/version/rest",
-        ApiServiceFactory.createDiscoveryPath("service", "version"));
-
-    assertIllegalArgument(null, "version", "Service name cannot be null or empty");
-    assertIllegalArgument("", "version", "Service name cannot be null or empty");
-    assertIllegalArgument("service", null, "Version cannot be null or empty");
-    assertIllegalArgument("service", "", "Version cannot be null or empty");
-  }
-
-  /**
-   * Asserts that an IllegalArgumentException is raised with the expected error
-   * message, given the service and version.
-   */
-  private void assertIllegalArgument(
-      String serviceName, String version, String expectedErrorMessage) {
-    try {
-      ApiServiceFactory.createDiscoveryPath(serviceName, version);
-      fail("Illegal argument given, passed precondition. Expected: " + expectedErrorMessage);
-    } catch (IllegalArgumentException e) {
-      assertEquals(expectedErrorMessage, e.getMessage());
-    }
-  }
-
-  /**
-   * Tests generation of the request path when it is not explicitly set on
-   * construction.
-   */
-  public void testGetRequestPath() {
-    ApiMethod method = EasyMock.createControl().createMock(ApiMethod.class);
-    EasyMock.expect(method.getHttpMethod()).andReturn(HttpMethod.GET);
-    EasyMock.expect(method.getPath()).andReturn("/path/to/{pathParam}").times(4);
-
-    ApiService service = EasyMock.createControl().createMock(ApiService.class);
-    EasyMock.expect(service.method("method")).andReturn(method);
-    EasyMock.expect(service.getBasePath()).andReturn("/base").times(4);
-
-    EasyMock.replay(method, service);
-
-    ApiRequest request = new ApiRequest(service, "method");
-
-    // Test that the path is generated even when required parameters are not
-    // specified.
-    assertEquals("/base/path/to/", request.getRequestPath());
-
-    // Setting the path param sets it in the path.
-    request.paramValues.put("pathParam", "1234");
-    assertEquals("/base/path/to/1234", request.getRequestPath());
-
-    request.paramValues.replaceValues("pathParam", ImmutableList.of("12/34"));
-    assertEquals("/base/path/to/12%2F34", request.getRequestPath());
-
-    request.paramValues.put("nonPathParam", "abc/de");
-    assertEquals("/base/path/to/12%2F34?nonPathParam=abc%2Fde", request.getRequestPath());
-
-    EasyMock.verify(method, service);
+  public void testUserAgent() {
+    MockApiRequest request = new MockApiRequest();
+    request.setHeaders();
+    assertTrue(request.addedHeaders.containsKey("X-JavaScript-User-Agent"));
+    assertTrue(request.addedHeaders.get("X-JavaScript-User-Agent").equals(ExplorerConfig.APP_NAME));
   }
 }
