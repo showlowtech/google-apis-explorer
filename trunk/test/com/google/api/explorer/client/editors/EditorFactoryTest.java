@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc.4
+ * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,10 +16,10 @@
 
 package com.google.api.explorer.client.editors;
 
-import com.google.api.explorer.client.TestUrlEncoder;
-import com.google.api.explorer.client.UrlEncoder;
-import com.google.api.explorer.client.base.ApiParameter;
-import com.google.api.explorer.client.base.ApiParameter.Type;
+import com.google.api.explorer.client.base.Schema;
+import com.google.api.explorer.client.base.Schema.Type;
+import com.google.api.explorer.client.base.TestUrlEncoder;
+import com.google.api.explorer.client.base.UrlEncoder;
 import com.google.api.explorer.client.editors.EditorFactory.DecimalValidator;
 import com.google.api.explorer.client.editors.EditorFactory.IntegerValidator;
 import com.google.api.explorer.client.editors.EditorFactory.MinimumMaximumValidator;
@@ -47,9 +47,6 @@ public class EditorFactoryTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    // Even though this functionality is not ready to be released, we still want
-    // to be able to test it.
-    EditorFactory.enableRepeatedParameters = true;
     EditorFactory.urlEncoder = new TestUrlEncoder();
   }
 
@@ -170,7 +167,7 @@ public class EditorFactoryTest extends TestCase {
    * An integer parameter results in a BasicEditor with an IntegerValidator
    */
   public void testEditorFactory_decimal() {
-    Editor editor = createParameter(false, Type.DECIMAL, null, null, null, null, false, null);
+    Editor editor = createParameter(false, Type.NUMBER, null, null, null, null, false, null);
     assertTrue(editor instanceof BasicEditor);
     assertEquals(2, editor.validators.size());
     assertTrue(editor.validators.get(0) instanceof DecimalValidator);
@@ -216,30 +213,6 @@ public class EditorFactoryTest extends TestCase {
     assertTrue(((RepeatedEditor) editor).innerEditor instanceof BasicEditor);
     assertEquals(0, editor.validators.size());
     assertEquals(1, ((RepeatedEditor) editor).innerEditor.validators.size());
-  }
-
-  /**
-   * When the repeated parameters UI is disabled, isRepeated() is never called
-   * and the parameter results in a BasicEditor.
-   */
-  // TODO(jasonhall): Remove this test when the enableRepeatedParameters flag is
-  // removed.
-  public void testEditorFactory_repeatedDisabled() {
-    EditorFactory.enableRepeatedParameters = false;
-    ApiParameter parameter = EasyMock.createControl().createMock(ApiParameter.class);
-    EasyMock.expect(parameter.getType()).andReturn(Type.STRING);
-    EasyMock.expect(parameter.getEnumValues()).andReturn(null);
-    EasyMock.expect(parameter.getEnumDescriptions()).andReturn(null);
-    EasyMock.expect(parameter.getMinimum()).andReturn(null);
-    EasyMock.expect(parameter.getMaximum()).andReturn(null);
-    EasyMock.expect(parameter.isRequired()).andReturn(false);
-    EasyMock.expect(parameter.getPattern()).andReturn(null);
-    EasyMock.replay(parameter);
-
-    Editor editor = EditorFactory.forParameter(parameter);
-    EasyMock.verify(parameter);
-
-    assertTrue(editor instanceof BasicEditor);
   }
 
   /**
@@ -293,7 +266,7 @@ public class EditorFactoryTest extends TestCase {
       String maximum,
       boolean required,
       String pattern) {
-    ApiParameter parameter = EasyMock.createControl().createMock(ApiParameter.class);
+    Schema parameter = EasyMock.createControl().createMock(Schema.class);
     EasyMock.expect(parameter.isRepeated()).andReturn(repeated);
     EasyMock.expect(parameter.getType()).andReturn(type);
     EasyMock.expect(parameter.getEnumValues()).andReturn(enumValues);

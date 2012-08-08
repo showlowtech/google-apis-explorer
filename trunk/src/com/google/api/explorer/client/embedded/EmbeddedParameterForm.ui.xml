@@ -1,8 +1,10 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:sch="urn:import:com.google.api.explorer.client.parameter.schema"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui">
-  <ui:style>
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:widgets="urn:import:com.google.api.explorer.client.widgets">
+  <ui:with field="res" type="com.google.api.explorer.client.Resources" />
+  <ui:style type="com.google.api.explorer.client.embedded.EmbeddedParameterForm.EmbeddedParameterFormStyle">
     .section {
       font-size: 13px;
       height: 100%;
@@ -20,21 +22,17 @@
       vertical-align: middle;
       padding: 0 4px;
       margin-left: 4px;
-      border-bottom: 1px solid #DBDBDB;
       padding: 14px;
     }
 
-    .section input {
+    .parameterInput input {
       width: 190px;
-      border: 1px solid silver;
+      border: 1px solid #D9D9D9;
       height: 29px;
-    }
-
-    .section input[type='text'] {
       padding-left: 8px;
     }
 
-    .section input:focus,
+    .parameterInput input:focus,
     .showRequestBody div:focus {
       border: 1px solid #4D90FE;
     }
@@ -82,10 +80,10 @@
       padding: 5px;
       background-color: #FFFFFF;
     }
-
-    .requestBody {
-      height: 300px;
-      width: 500px;
+    
+    .popupGlass {
+      background: #666;
+      opacity: 0.5;
     }
 
     .execute,
@@ -105,7 +103,7 @@
       background-image: -ms-linear-gradient(top,#4d90fe,#4787ed);
       background-image: -o-linear-gradient(top,#4d90fe,#4787ed);
       background-image: linear-gradient(top,#4d90fe,#4787ed);
-      filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#4d90fe',EndColorStr='#4787ed');
+      filter: literal("progid:DXImageTransform.Microsoft.gradient(startColorStr='#4d90fe',EndColorStr='#4787ed')");
     }
 
     .execute:hover,
@@ -117,7 +115,7 @@
       background-image: -ms-linear-gradient(top,#4d90fe,#357ae8);
       background-image: -o-linear-gradient(top,#4d90fe,#357ae8);
       background-image: linear-gradient(top,#4d90fe,#357ae8);
-      filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#4d90fe',EndColorStr='#357ae8');
+      filter: literal("progid:DXImageTransform.Microsoft.gradient(startColorStr='#4d90fe',EndColorStr='#357ae8')");
     }
 
     .popup button {
@@ -130,6 +128,7 @@
 
     .popup button {
       margin-top: 16px;
+      margin-right: 16px;
     }
 
     .footer span {
@@ -152,40 +151,16 @@
       padding-bottom: 12px;
     }
 
-    .bodyDisclosureContainer {
-      display: inline;
+    .selected {
+      outline-color: #E59700;
+      outline-style: auto;
+      outline-width: 5px;
     }
   </ui:style>
   <g:HTMLPanel styleName="{style.section} form">
     <div class="{style.body}">
       <g:FlexTable ui:field="table" />
-
-      <g:PopupPanel ui:field="popupPanel" modal="true">
-        <g:HTMLPanel styleName="{style.popup}">
-          <div class="{style.popupTitle}">Request body</div>
-          <div class="{style.popupBody}">
-            <div class="{style.fieldsExplanation}">
-                Specify what will be sent in the HTTP request body.</div>
-            <g:TabPanel ui:field="tabPanel">
-              <g:Tab text="Structured Editor">
-                <g:SimplePanel>
-                  <sch:SchemaForm ui:field="schemaForm" />
-                </g:SimplePanel>
-              </g:Tab>
-              <g:Tab text="Plain Text Editor">
-                <g:SimplePanel>
-                  <g:TextArea ui:field="requestBody" styleName="{style.requestBody}" />
-                </g:SimplePanel>
-              </g:Tab>
-            </g:TabPanel>
-            <div>
-              <g:Button ui:field="close">Close</g:Button>
-            </div>
-          </div>
-        </g:HTMLPanel>
-      </g:PopupPanel>
-
-      <g:PopupPanel ui:field="fieldsPopupPanel" autoHideEnabled="true" modal="true">
+      <g:PopupPanel ui:field="fieldsPopupPanel" autoHideEnabled="true" modal="true" glassEnabled="true" glassStyleName="{style.popupGlass}">
         <g:HTMLPanel styleName="{style.popup} popup">
           <div class="{style.popupTitle} title">Use a partial fields mask</div>
           <div class="{style.popupBody} body">
@@ -199,19 +174,13 @@
     </div>
 
     <!--  These will all be moved into the table itself. -->
-    <g:FlowPanel ui:field="bodyDisclosure" styleName="{style.bodyDisclosureContainer}">
-      <g:Button ui:field="bodyDisclosureButton" styleName="{style.showRequestBody}">
-        Add request body
-      </g:Button>
-    </g:FlowPanel>
     <g:Button styleName="{style.execute}" ui:field="submit">Execute</g:Button>
-    <img class="{style.executing}" ui:field="executing" />
     <g:FlowPanel ui:field="requiredDescription">
       <g:InlineLabel ui:field="requiredDescriptionLabel">bold red</g:InlineLabel>
       <g:InlineLabel>&nbsp;= required</g:InlineLabel>
     </g:FlowPanel>
-
-    <!--  This is unused but must be present to stay compliant with the subclass -->
-    <g:Label ui:field="bodyDisclosureLabel" visible="false">Unused</g:Label>
+    <g:Label ui:field="emptyNotificationLabel" visible="false">
+      No parameters for this request
+    </g:Label>
   </g:HTMLPanel>
 </ui:UiBinder>

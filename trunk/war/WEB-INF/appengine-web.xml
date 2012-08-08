@@ -1,6 +1,8 @@
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-  <application>google-api-explorer</application>
-  <version>pt109</version>
+  <application>apis-explorer</application>
+  <version>notyourmail</version>
+  <!-- TODO(moshenko) please update threadsafe to true if code is threadsafe -->
+  <threadsafe>false</threadsafe>
 
   <!-- Cache generated GWT files, except nocache files. -->
   <static-files>
@@ -9,5 +11,6 @@
     <include path="**.cache.*" expiration="365d" />
     <include path="**/com.google.api.explorer.Explorer.devmode.js" />
     <include path="**/com.google.api.explorer.Embedded.devmode.js" />
+    <include path="**/com.google.api.explorer.Redirect.devmode.js" />
   </static-files>
 </appengine-web-app>

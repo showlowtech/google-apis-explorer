@@ -71,18 +71,22 @@ class BasicEditor extends Editor {
 
     @Override
     public void displayValidation(ValidationResult valid) {
+      removeStyleName(Resources.INSTANCE.style().infoParameter());
+      removeStyleName(Resources.INSTANCE.style().invalidParameter());
+
       switch(valid.getType()) {
         case VALID:
-          setStyleName("");
           errorMessage.setVisible(false);
           break;
+
         case INFO:
-          setStyleName(Resources.INSTANCE.style().infoParameter());
+          addStyleName(Resources.INSTANCE.style().infoParameter());
           errorMessage.setVisible(true);
           errorMessage.setText(valid.getMessage());
           break;
+
         case ERROR:
-          setStyleName(Resources.INSTANCE.style().invalidParameter());
+          addStyleName(Resources.INSTANCE.style().invalidParameter());
           errorMessage.setVisible(true);
           errorMessage.setText(valid.getMessage());
           break;

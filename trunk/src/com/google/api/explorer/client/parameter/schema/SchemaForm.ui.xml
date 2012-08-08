@@ -3,15 +3,10 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:style>
     .schemaForm {
-      /**
+      /*
        * These dimensions, combined with the padding, mean that the popup will
        * not change sizes when switching tabs.
        */
-      height: 297px;
-      width: 494px;
-      overflow: auto;
-      background-color: #fff;
-      border: 1px solid #C9D7F1;
       padding: 5px;
     }
 
@@ -32,6 +27,10 @@
     .schemaForm textarea:focus,
     .schemaForm input[type="text"]:focus {
       outline: none;
+    }
+
+    .schemaForm input[type="checkbox"] {
+      vertical-align: middle;
     }
 
     .schemaForm textarea {

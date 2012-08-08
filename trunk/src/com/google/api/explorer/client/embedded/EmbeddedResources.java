@@ -19,6 +19,7 @@ package com.google.api.explorer.client.embedded;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.CssResource.Shared;
 
 /**
  * Styling resources for the embedded version of the Explorer.
@@ -37,6 +38,7 @@ public interface EmbeddedResources extends ClientBundle {
   /**
    * {@link CssResource} for embedded.css
    */
+  @Shared
   public interface Css extends CssResource {
 
     String parameterFormNameCell();

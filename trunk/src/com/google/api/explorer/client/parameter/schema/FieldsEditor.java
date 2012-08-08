@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,10 +16,9 @@
 
 package com.google.api.explorer.client.parameter.schema;
 
-import com.google.api.explorer.client.AppState;
 import com.google.api.explorer.client.Resources;
+import com.google.api.explorer.client.base.ApiService;
 import com.google.api.explorer.client.base.Schema;
-import com.google.api.explorer.client.base.Schema.Property;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
@@ -46,22 +45,22 @@ import java.util.Map.Entry;
 /**
  * Tree-based UI for selecting fields to request, based on the response schema
  * for a method.
- * 
+ *
  * @author jasonhall@google.com (Jason Hall)
  */
 public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
 
   private static final Joiner JOINER = Joiner.on(',').skipNulls();
 
-  private final AppState appState;
+  private final ApiService service;
   private final String key;
   private final CheckBox root;
   private final Map<String, HasValue<Boolean>> children = Maps.newHashMap();
 
-  public FieldsEditor(AppState appState, String key) {
+  public FieldsEditor(ApiService service, String key) {
     super("");
 
-    this.appState = appState;
+    this.service = service;
     this.key = key;
     root = new CheckBox(key.isEmpty() ? "Select all/none" : key);
     root.setValue(false);
@@ -79,7 +78,7 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
   /**
    * Sets the properties this field will have, if it is an object.
    */
-  public void setProperties(Map<String, Property> properties) {
+  public void setProperties(Map<String, Schema> properties) {
     List<String> keys = Lists.newArrayList(properties.keySet());
     Collections.sort(keys);
 
@@ -87,9 +86,9 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
     inner.getElement().getStyle().setPaddingLeft(20, Unit.PX);
 
     for (String childKey : keys) {
-      final Property property = properties.get(childKey);
-      final Map<String, Property> childProperties = property.getProperties();
-      final Property items = property.getItems();
+      final Schema property = properties.get(childKey);
+      final Map<String, Schema> childProperties = property.getProperties();
+      final Schema items = property.getItems();
 
       if (childProperties == null && items == null) {
         // This is a simple field
@@ -101,7 +100,7 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
         inner.add(checkBox);
       } else {
 
-        final FieldsEditor editor = new FieldsEditor(appState, childKey);
+        final FieldsEditor editor = new FieldsEditor(service, childKey);
         children.put(childKey, editor);
         inner.add(editor);
 
@@ -133,7 +132,7 @@ public class FieldsEditor extends HTMLPanel implements HasValue<Boolean> {
     expando.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
-        Schema sch = appState.getCurrentService().getSchemas().get(ref);
+        Schema sch = service.getSchemas().get(ref);
         setProperties(sch.getProperties());
         remove(expando);
       }

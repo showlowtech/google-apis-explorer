@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field="res" type="com.google.api.explorer.client.Resources" />
   <ui:style>
     .listBox {
       margin-left: 20px;
@@ -8,13 +9,24 @@
     }
 
     .panel {
-      padding-left: 20px;
+      padding-left: 15px;
+    }
+
+    .newItem {
+      margin-left: 20px;
+      font-family: sans-serif;
+      font-size: .7em;
     }
   </ui:style>
   <g:HTMLPanel>
     {
     <g:HTMLPanel ui:field="panel" styleName="{style.panel}" />
-    <g:ListBox ui:field="listBox" styleName="{style.listBox}" />
+    <g:FlowPanel styleName="{res.style.requestEditorControl}">
+      <g:ListBox ui:field="listBox" styleName="{style.listBox}" />
+      <g:InlineLabel ui:field="newItem" styleName="{res.style.clickable} {style.newItem}">
+      Add
+      </g:InlineLabel>
+    </g:FlowPanel>
     <div>}</div>
   </g:HTMLPanel>
 </ui:UiBinder>
